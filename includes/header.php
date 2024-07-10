@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Microfinance System</title>
+  <title>Inua Premium Services</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -35,7 +35,7 @@
     <div class="container-fluid position-relative d-flex align-items-center justify-content-between">
 
       <a href="../index.php" class="logo d-flex align-items-center me-auto me-xl-0">
-        <h1 class="sitename">Microfinance</h1><span>.</span>
+        <h1 class="sitename">Inua premium Services</h1><span>.</span>
       </a>
 
       <nav id="navmenu" class="navmenu">

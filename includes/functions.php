@@ -13,12 +13,34 @@ function db_connect() {
 }
 
 // User management functions
-function add_user($name, $email, $password, $role) {
+function add_user($name, $email, $password, $role,$loanOfficer) {
+    if($role=="loanOfficer")
+    {
+        $conn = db_connect();
+        $stmt = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT), $role]);
+    }
+   else{
     $conn = db_connect();
-    $stmt = $conn->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-    return $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT), $role]);
+    $stmt = $conn->prepare("INSERT INTO users (name, email, password, role,loanOfficer) VALUES (?, ?, ?, ?,?)");
+    return $stmt->execute([$name, $email, password_hash($password, PASSWORD_DEFAULT), $role,$loanOfficer]);
+   }
 }
-
+function login($email, $password) {
+    $pdo=db_connect();
+    
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email");
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+    
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user && password_verify($password, $user['password'])) {
+        $role=$user['role'];
+        return '1,$role'; // Success
+    } else {
+        return '0'; // Failure
+    }
+}
 function update_user($id, $name, $email, $password) {
     $conn = db_connect();
     $stmt = $conn->prepare("UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?");
@@ -66,6 +88,13 @@ function track_repayment($loan_id, $amount) {
 function calculate_portfolio_at_risk() {
     $conn = db_connect();
     $stmt = $conn->query("SELECT SUM(amount) as total_amount FROM loans WHERE status = 'Disbursed' AND due_date < NOW()");
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    return $result['total_amount'];
+}
+// Portfolio at risk calculation for loan officer
+function calculate_portfolio_at_risk_for_user($loanOfficer) {
+    $conn = db_connect();
+    $stmt = $conn->query("SELECT SUM(amount) as total_amount FROM loans WHERE status = 'Disbursed' AND loan_officer='$loanOfficer' AND due_date < NOW()");
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
     return $result['total_amount'];
 }

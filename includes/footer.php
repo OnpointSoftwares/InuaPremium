@@ -12,7 +12,7 @@
       <div class="row gy-4">
         <div class="col-lg-5 col-md-12 footer-about">
           <a href="../index.php" class="logo d-flex align-items-center">
-            <span class="sitename">Microfinance</span>
+            <span class="sitename">Inua Premium Services</span>
           </a>
           <p>Providing financial solutions for a better future.</p>
           <div class="social-links d-flex mt-4">
@@ -47,10 +47,10 @@
 
         <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
           <h4>Contact Us</h4>
-          <p>A108 Adam Street</p>
-          <p>New York, NY 535022</p>
-          <p>United States</p>
-          <p class="mt-4"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
+          <p>P.O BOX 20157,</p>
+          <p>Nakuru.</p>
+          <p>Kenya</p>
+          <p class="mt-4"><strong>Phone:</strong> <span>0111234567</span></p>
           <p><strong>Email:</strong> <span>info@example.com</span></p>
         </div>
 
@@ -58,9 +58,9 @@
     </div>
 
     <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="sitename">Microfinance</strong> <span>All Rights Reserved</span></p>
+      <p>© <span>Copyright</span> <strong class="sitename">Inua Premium Services</strong> <span>All Rights Reserved</span></p>
       <div class="credits">
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+
       </div>
     </div>
 
