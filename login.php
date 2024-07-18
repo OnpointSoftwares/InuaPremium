@@ -1,16 +1,21 @@
 <?php
 require_once("includes/functions.php");
-session_start();
 
 if (isset($_POST['login'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
-
+    $role=$_POST['role'];
     // Check login credentials
-    $res = login($email, $password);
-    if ($res == '1') {
+    $res = login($email, $password,$role);
+    $sp = explode(",", $res);
+    echo $sp[1];
+    if ($sp[0] == '1' && $sp[1]== 'admin') {
         $_SESSION['email'] = $email;
-        header("Location: admin/"); // Redirect to a dashboard or home page
+        ?>
+       <script>
+       location.replace("admin/");
+       </script>// Redirect to a dashboard or home page
+       <?php
     } else {
         $error_message = "Invalid email or password.";
     }
@@ -64,7 +69,7 @@ if (isset($_POST['login'])) {
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
 
-            <a class="btn-getstarted" href="index.html#about">Get Started</a>
+            <a class="btn-getstarted" href="login.php">Login</a>
         </div>
     </header>
 
@@ -81,6 +86,15 @@ if (isset($_POST['login'])) {
                             <?php endif; ?>
 
                             <form method="post" action="">
+                            <div class="mb-3">
+                                    <select class="form-control" name="role">
+                                        <option value="">select user type</option>
+                                        <option value="1">Admin</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="client">Client</option>
+                                        <option value="2">Loan Officer</option> 
+                            </select>
+                                </div>
                                 <div class="mb-3">
                                     <input type="email" name="email" required class="form-control" placeholder="Email">
                                 </div>
@@ -88,7 +102,7 @@ if (isset($_POST['login'])) {
                                     <input type="password" name="password" required class="form-control" placeholder="Password">
                                 </div>
                                 <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary btn-block" name="login">Login</button>
+                                    <button type="submit" class="btn btn-primary btn-block" style="background:#e84545;" name="login">Login</button>
                                 </div>
                             </form>
                         </div>
