@@ -11,7 +11,7 @@ if(isset($_POST['addStaff']))
    //echo $name,$email,$phone,$password,$area,$role;
     if(add_user($name, $email, $password, $role, $area,$phone))
     {
-        header("Location: mail.php?email='$email'");
+        header("Location: mail.php?email=$email");
     }
     else{
         ?>

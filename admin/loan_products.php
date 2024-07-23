@@ -1,31 +1,22 @@
-<?php
-include_once("../includes/functions.php");
-
-// Get the list of loan officers, areas, and roles
-$loanOfficers = getLoanOfficers();
-$areas = getAreas(); // Assuming getAreas function is defined similarly
-$roles = getRoles();
+<?php 
+include '../includes/functions.php';
+$loanProducts=getLoanProducts();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Loan Officers - Inua Premium Services</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Loan Products</title>
     <link href="/assets/img/logo.png" rel="icon">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="/assets/img/logo.png" rel="apple-touch-icon">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Montserrat&family=Poppins&display=swap" rel="stylesheet">
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Main JS File -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.js" integrity="sha512-+k1pnlgt4F1H8L7t3z95o3/KO+o78INEcXTbnoJQ/F2VqDVhWoaiVml/OEHv9HsVgxUaVW+IbiZPUJQfF/YxZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
-        /* Additional or overridden styles specific to this page */
         body {
-            background-color: #ffffff;
+            background-color: #f8f9fa;
             color: #212529;
             font-family: 'Open Sans', sans-serif;
             margin: 0;
@@ -37,6 +28,10 @@ $roles = getRoles();
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
         }
         .header .logo h1 {
             color: #ffffff;
@@ -66,6 +61,8 @@ $roles = getRoles();
             width: 250px;
             position: fixed;
             height: 100%;
+            top: 60px; /* Height of header */
+            left: 0;
             overflow: auto;
         }
         .sidebar .nav-item .nav-link {
@@ -80,67 +77,124 @@ $roles = getRoles();
         .main {
             margin-left: 270px;
             padding: 20px;
+            margin-top: 70px; /* Space for header */
         }
         .table-container {
-            overflow-x: auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #e84545;
+            color: #ffffff;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .btn-primary {
+            background-color: #e84545;
+            border: none;
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .btn-primary:hover {
+            background-color: #d73434;
+        }
+        .btn-action {
+            margin: 0;
+            padding: 0;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: #e84545;
+        }
+        .btn-action:hover {
+            color: #d73434;
+        }
+        .search-container {
+            margin-bottom: 20px;
+        }
+        .search-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
     </style>
 </head>
-<body class="admin-page">
-    <!-- Header -->
-    <?php
-    include("includes/header.php");
-    include("../includes/sidebar.php");
-    ?>
+<body>
+    <!-- Header and Sidebar -->
+    <div class="header">
+        <div class="logo">
+            <h1>Loan Management</h1>
+        </div>
+    </div>
+<?php 
+include 'includes/header.php'; ?>
+    <div class="sidebar">
+        <?php include '../includes/sidebar.php'; ?>
+    </div>
+
     <main class="main">
-        <section id="loan-officers" class="loan-officers section">
-            <div class="container">
-                <h1>Staff</h1>
-                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addLoanOfficerModal">Add Staff</button>
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (!empty($loanOfficers)): ?>
-                                <?php foreach ($loanOfficers as $officer): ?>
-                                    <tr>
-                                        <td><?php echo htmlspecialchars($officer['id']); ?></td>
-                                        <td><?php echo htmlspecialchars($officer['name']); ?></td>
-                                        <td><?php echo htmlspecialchars($officer['email']); ?></td>
-                                        <td><?php echo htmlspecialchars($officer['phone']); ?></td>
-                                        <td><?php echo htmlspecialchars(getRole($officer['role_id'])); ?></td>
-                                        <td>
-                                            <a href="edit_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-primary">Edit</a>
-                                            <a href="delete_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-danger">Delete</a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <tr>
-                                    <td colspan="6">No loan officers found.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
+        <div class="container">
+            <div class="table-container">
+                <h2>Manage Loan Products</h2>
+                <div class="search-container">
+                    <input type="text" placeholder="Search...">
                 </div>
+                <button class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#addLoanProductModal">Add Loan Product</button>
+                <br>
+                <br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Branch Access</th>
+                            <th>Penalty Settings</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                            foreach($loanProducts as $product)
+                                    {
+                                        ?>
+                                        <tr>
+                                            <td><?php  echo $product['name']; ?></td>
+                                            <td><?php  echo $product['branch_access']; ?></td>
+                                            <td><?php  echo $product['penalty_settings']; ?></td>
+                                            <td><?php  echo $product['status']; ?></td>
+                                            
+                                            <td><button class="btn-action">Edit</button></td>
+                                        </tr>
+                                        <?php
+                                    }
+                        ?>
+                        
+                       
+                         
+                    </tbody>
+                </table>
             </div>
-        </section>
-        
-        <!-- Add Loan Officer Modal -->
-        <div class="modal fade" id="addLoanOfficerModal" tabindex="-1" aria-labelledby="addLoanOfficerModalLabel" aria-hidden="true">
+        </div>
+        <div class="modal fade" id="addLoanProductModal" tabindex="-1" aria-labelledby="addLoanProductModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addLoanOfficerModalLabel">Add Staff</h5>
+                        <h5 class="modal-title" id="addLoanProductModalLabel">Add Staff</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form action="add_staff.php" method="POST">
@@ -187,16 +241,6 @@ $roles = getRoles();
                     </form>
                 </div>
             </div>
-        </div>
     </main>
-    <!-- Vendor JS Files -->
-    
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/aos/aos.js"></script>
-    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Main JS File -->
-    <script src="assets/js/main.js"></script>
 </body>
 </html>

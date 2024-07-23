@@ -1,5 +1,4 @@
 <?php
-
 $userId = 1; // Assume a logged-in user with ID 1
 $roleId = getUserRole($userId);
 $navItems = getNavigationItems($roleId);
@@ -14,7 +13,11 @@ function renderNavItems($items, $parentId = NULL) {
 
             $hasSubItems = !empty($subItems);
             $html .= '<li class="nav-item">';
-            $html .= '<a class="nav-link" href="' . $item['url'] . '"' . ($hasSubItems ? ' data-toggle="collapse"' : '') . '>';
+            $html .= '<a class="nav-link' . ($hasSubItems ? ' collapsed' : '') . '" href="' . $item['url'] . '"';
+            if ($hasSubItems) {
+                $html .= ' data-bs-toggle="collapse" data-bs-target="#collapse-' . $item['id'] . '" aria-expanded="false" aria-controls="collapse-' . $item['id'] . '"';
+            }
+            $html .= '>';
             if ($item['icon']) {
                 $html .= '<i class="' . $item['icon'] . '" title="' . $item['title'] . '"></i>';
             }
@@ -22,7 +25,7 @@ function renderNavItems($items, $parentId = NULL) {
             $html .= '</a>';
 
             if ($hasSubItems) {
-                $html .= '<ul class="collapse list-unstyled">';
+                $html .= '<ul id="collapse-' . $item['id'] . '" class="collapse list-unstyled">';
                 $html .= renderNavItems($items, $item['id']);
                 $html .= '</ul>';
             }
@@ -40,22 +43,30 @@ function renderNavItems($items, $parentId = NULL) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Microfinance Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
     <style>
         .sidebar {
             background-color: #f8f9fa;
             padding: 10px;
             height: 100vh;
+            width: 250px; /* Adjust width as needed */
+            position: fixed;
         }
 
         .sidebar .nav-link {
             color: #333;
+            display: block;
+            padding: 10px;
+            text-decoration: none;
         }
 
-        .sidebar .nav-link.active {
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
             background-color: #007bff;
             color: #fff;
+        }
+
+        .sidebar .collapse {
+            margin-left: 20px; /* Indentation for sub-menu items */
         }
     </style>
 </head>
@@ -66,9 +77,8 @@ function renderNavItems($items, $parentId = NULL) {
         </ul>
     </aside><!-- End Sidebar -->
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Include Bootstrap and jQuery JS -->
+    <script src="../assets/js/jquery.min.js"></script>
+    <script src="../assets/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -8,9 +8,9 @@ if (isset($_POST['login'])) {
     // Check login credentials
     $res = login($email, $password,$role);
     $sp = explode(",", $res);
-    echo $sp[1];
-    if ($sp[0] == '1' && $sp[1]== 'admin') {
+    if ($sp[0] == '1' && $sp[1]== '1') {
         $_SESSION['email'] = $email;
+        $_SESSION['role']=$role;
         ?>
        <script>
        location.replace("admin/");
@@ -87,12 +87,17 @@ if (isset($_POST['login'])) {
 
                             <form method="post" action="">
                             <div class="mb-3">
+                            <?php
+                                        $roles=getRoles();
+                                        ?>
                                     <select class="form-control" name="role">
                                         <option value="">select user type</option>
-                                        <option value="1">Admin</option>
-                                        <option value="manager">Manager</option>
-                                        <option value="client">Client</option>
-                                        <option value="2">Loan Officer</option> 
+                                        <?php
+                                        foreach($roles as $role)
+                                        {
+                                            echo "<option value=".$role['id'].">".$role['name']."</option>";
+                                        }
+                                        ?>
                             </select>
                                 </div>
                                 <div class="mb-3">

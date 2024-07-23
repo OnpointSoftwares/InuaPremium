@@ -8,12 +8,7 @@ require_once "PHPMailer/src/SMTP.php";
 require_once"vendor/autoload.php";
 
 $mail = new PHPMailer(true);
-$email=$_POST['semail'];
-$new_password=rand(10000,20000);
-$conn=mysqli_connect("localhost","root","","assignment");
-$sql="update sdetails set spassword='$new_password' where semail='$email'";
-if($query=mysqli_query($conn,$sql))
-{
+$email=$_GET['email'];
 try {
 	$mail->SMTPOptions = array(
 		'ssl' => array(
@@ -27,20 +22,19 @@ try {
 	$mail->Host	 = 'smtp.gmail.com;';					
 	$mail->SMTPAuth = true;							
 	$mail->Username = 'vincentbettoh@gmail.com';				
-	$mail->Password = 'vecz oiqv wrlp jxne';						
+	$mail->Password = 'pwjc ryxi niml firh';						
 	$mail->SMTPSecure = 'tls';							
 	$mail->Port	 = 587;
 	$mail->setFrom("student@gmail.com", "Login");		
 	$mail->addAddress($email);	
 	$mail->isHTML(true);								
-	$mail->Subject = 'Password reset';
-	$mail->Body="Your password has been successfully reset to:$new_password login with your new password";
+	$mail->Subject = 'Account Activation';
+	$mail->Body="Follow this <a href='#'>link to activate your account";
 	$mail->AltBody = 'Body in plain text for non-HTML mail clients';
 	$mail->send();
 	echo "Mail has been sent successfully!";
 
 } catch (Exception $e) {
 	echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-}
 }
 ?>
