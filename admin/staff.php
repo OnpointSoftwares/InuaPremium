@@ -117,7 +117,7 @@ $roles = getRoles();
                                         <td><?php echo htmlspecialchars($officer['name']); ?></td>
                                         <td><?php echo htmlspecialchars($officer['email']); ?></td>
                                         <td><?php echo htmlspecialchars($officer['phone']); ?></td>
-                                        <td><?php echo htmlspecialchars(getRole($officer['role_id'])); ?></td>
+                                        <td><?php echo getRole($officer['id'])['name']; ?></td>
                                         <td>
                                             <a href="edit_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-primary">Edit</a>
                                             <a href="delete_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-danger">Delete</a>
@@ -166,7 +166,7 @@ $roles = getRoles();
                                 <select class="form-select" id="areaId" name="areaId" required>
                                     <option value="">Select Area</option>
                                     <?php foreach ($areas as $area): ?>
-                                        <option value="<?php echo htmlspecialchars($area['area_id']); ?>"><?php echo htmlspecialchars($area['area_id']); ?></option>
+                                        <option value="<?php echo htmlspecialchars($area['area_id']); ?>"><?php echo htmlspecialchars($area['area_name']); ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>

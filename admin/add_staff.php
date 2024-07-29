@@ -7,7 +7,7 @@ if(isset($_POST['addStaff']))
     $phone=$_POST['officerPhone'];
     $password=$_POST['officerPassword'];
     $area=$_POST['areaId'];
-    $role=$_POST['role'];
+    $role=$_POST['roleId'];
    //echo $name,$email,$phone,$password,$area,$role;
     if(add_user($name, $email, $password, $role, $area,$phone))
     {

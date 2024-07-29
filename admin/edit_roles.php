@@ -17,7 +17,6 @@
             font-family: 'Open Sans', sans-serif;
             margin: 0;
         }
-
         .header {
             background-color: #e84545;
             color: #ffffff;
@@ -26,33 +25,27 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .header .logo h1 {
             color: #ffffff;
             margin: 0;
             font-size: 24px;
         }
-
         .header .navmenu ul {
             list-style: none;
             padding: 0;
             margin: 0;
             display: flex;
         }
-
         .header .navmenu ul li {
             margin-right: 20px;
         }
-
         .header .navmenu ul li a {
             color: #ffffff;
             text-decoration: none;
         }
-
         .header .navmenu ul li a.active, .header .navmenu ul li a:hover {
             color: #e84545;
         }
-
         .sidebar {
             background-color: #ffffff;
             color: #3a3939;
@@ -62,48 +55,39 @@
             height: 100%;
             overflow: auto;
         }
-
         .sidebar .nav-item .nav-link {
             color: #3a3939;
             padding: 10px 15px;
             text-decoration: none;
             display: block;
         }
-
         .sidebar .nav-item .nav-link.active, .sidebar .nav-item .nav-link:hover {
             color: #e84545;
         }
-
         .main {
             margin-left: 270px;
             padding: 20px;
         }
-
         .table-container {
             overflow-x: auto;
         }
-
         .container h1 {
             font-size: 28px;
             margin-bottom: 20px;
         }
-
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-
         .table th, .table td {
             border: 1px solid #ddd;
             padding: 8px;
         }
-
         .table th {
             background-color: #f2f2f2;
             text-align: left;
         }
-
         .table td .btn {
             background-color: #e84545;
             color: #ffffff;
@@ -112,7 +96,6 @@
             border-radius: 4px;
             cursor: pointer;
         }
-
         .table td .btn:hover {
             background-color: #d73434;
         }
@@ -133,7 +116,8 @@
                 <form action='edit_roles.php' method='POST'>
                     <?php 
                     $role_id = $_POST['role_id'];
-                    $roles = getRole($role_id);
+                    $role = getRole($role_id);
+                    $permissions = getNavigationItems($role['id']);
                     ?>
                     <table class="table">
                         <thead>
@@ -145,13 +129,13 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><?php echo htmlspecialchars($roles['name']); ?></td>
+                                <td><input type="text" name="role_name" value="<?php echo htmlspecialchars($role['name']); ?>"></td>
                                 <td>
                                     <ul>
                                         <?php
-                                        $permissions = getNavigationItems($role_id);
                                         foreach ($permissions as $permission) {
-                                            echo "<li><input type='checkbox' name='permissions[]' value='".$permission['id']."'> ".$permission['title']."</li>";
+                                            $checked = in_array($permission['id'], explode(',', $role['permissions'])) ? 'checked' : '';
+                                            echo "<li><input type='checkbox' name='permissions[]' value='".htmlspecialchars($permission['id'])."' $checked aria-label='".htmlspecialchars($permission['title'])."'> ".htmlspecialchars($permission['title'])."</li>";
                                         }
                                         ?>
                                     </ul>
@@ -163,6 +147,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                 </form>
             </div>
         </section>

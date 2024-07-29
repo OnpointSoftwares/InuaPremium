@@ -9,7 +9,7 @@ if (isset($_GET['logout'])) {
 
 $totalAreas = getTotalAreas();
 $totalDisbursedLoans = getTotalDisbursedLoans();
-$portfolioAtRisk = getPortfolioAtRisk();
+$portfolioAtRisk =calculate_portfolio_at_risk($days_overdue = 30, $loanOfficer = null);
 ?>
 <!DOCTYPE html>
 <html lang="en">

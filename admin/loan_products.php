@@ -1,19 +1,22 @@
 <?php 
 include '../includes/functions.php';
-$loanProducts=getLoanProducts();
+$loanProducts = getLoanProducts();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Loan Products</title>
-    <link href="/assets/img/logo.png" rel="icon">
+      <link href="/assets/img/logo.png" rel="icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="/assets/img/logo.png" rel="apple-touch-icon">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Montserrat&family=Poppins&display=swap" rel="stylesheet">
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -136,16 +139,9 @@ $loanProducts=getLoanProducts();
 </head>
 <body>
     <!-- Header and Sidebar -->
-    <div class="header">
-        <div class="logo">
-            <h1>Loan Management</h1>
-        </div>
-    </div>
-<?php 
-include 'includes/header.php'; ?>
-    <div class="sidebar">
-        <?php include '../includes/sidebar.php'; ?>
-    </div>
+   <?php include 'includes/header.php'; ?>
+    
+    <?php include '../includes/sidebar.php'; ?>
 
     <main class="main">
         <div class="container">
@@ -169,23 +165,16 @@ include 'includes/header.php'; ?>
                     </thead>
                     <tbody>
                     <?php
-                            foreach($loanProducts as $product)
-                                    {
-                                        ?>
-                                        <tr>
-                                            <td><?php  echo $product['name']; ?></td>
-                                            <td><?php  echo $product['branch_access']; ?></td>
-                                            <td><?php  echo $product['penalty_settings']; ?></td>
-                                            <td><?php  echo $product['status']; ?></td>
-                                            
-                                            <td><button class="btn-action">Edit</button></td>
-                                        </tr>
-                                        <?php
-                                    }
-                        ?>
-                        
-                       
-                         
+                        foreach ($loanProducts as $product) {
+                            echo "<tr>
+                                <td>{$product['name']}</td>
+                                <td>{$product['branch_access']}</td>
+                                <td>{$product['penalty_settings']}</td>
+                                <td>{$product['status']}</td>
+                                <td><button class='btn-action'>Edit</button></td>
+                            </tr>";
+                        }
+                    ?>
                     </tbody>
                 </table>
             </div>
@@ -194,53 +183,39 @@ include 'includes/header.php'; ?>
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="addLoanProductModalLabel">Add Staff</h5>
+                        <h5 class="modal-title" id="addLoanProductModalLabel">Add Loan Product</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <form action="add_staff.php" method="POST">
+                    <form action="add_loan_product.php" method="POST">
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="officerName" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="officerName" name="officerName" required>
+                                <label for="name" class="form-label">Name</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
                             </div>
                             <div class="mb-3">
-                                <label for="officerEmail" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="officerEmail" name="officerEmail" required>
+                                <label for="branch_access" class="form-label">Branch Access</label>
+                                <input type="text" class="form-control" id="branch_access" name="branch_access" required>
                             </div>
                             <div class="mb-3">
-                                <label for="officerPhone" class="form-label">Phone</label>
-                                <input type="text" class="form-control" id="officerPhone" name="officerPhone" required>
+                                <label for="penalty_settings" class="form-label">Penalty Settings</label>
+                                <input type="text" class="form-control" id="penalty_settings" name="penalty_settings" required>
                             </div>
                             <div class="mb-3">
-                                <label for="officerPassword" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="officerPassword" name="officerPassword" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="areaId" class="form-label">Area</label>
-                                <select class="form-select" id="areaId" name="areaId" required>
-                                    <option value="">Select Area</option>
-                                    <?php foreach ($areas as $area): ?>
-                                        <option value="<?php echo htmlspecialchars($area['area_id']); ?>"><?php echo htmlspecialchars($area['area_id']); ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="roleId" class="form-label">Role</label>
-                                <select class="form-select" id="roleId" name="roleId" required>
-                                    <option value="">Select Role</option>
-                                    <?php foreach ($roles as $role): ?>
-                                        <option value="<?php echo htmlspecialchars($role['id']); ?>"><?php echo htmlspecialchars($role['name']); ?></option>
-                                    <?php endforeach; ?>
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
                                 </select>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary" name="addStaff">Add Staff</button>
+                            <button type="submit" class="btn btn-primary" name="addLoanProduct">Add Loan Product</button>
                         </div>
                     </form>
                 </div>
             </div>
+        </div>
     </main>
 </body>
 </html>

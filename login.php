@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once("includes/functions.php");
 
 if (isset($_POST['login'])) {
@@ -6,6 +7,7 @@ if (isset($_POST['login'])) {
     $password = $_POST['password'];
     $role=$_POST['role'];
     // Check login credentials
+    echo $role;
     $res = login($email, $password,$role);
     $sp = explode(",", $res);
     if ($sp[0] == '1' && $sp[1]== '1') {
@@ -16,7 +18,17 @@ if (isset($_POST['login'])) {
        location.replace("admin/");
        </script>// Redirect to a dashboard or home page
        <?php
-    } else {
+    }
+    else if ($sp[0] == '1' && $sp[1]== '2') {
+        $_SESSION['email'] = $email;
+        $_SESSION['role']=$role;
+        ?>
+       <script>
+       location.replace("admin/");
+       </script>// Redirect to a dashboard or home page
+       <?php
+    }
+     else {
         $error_message = "Invalid email or password.";
     }
 }
