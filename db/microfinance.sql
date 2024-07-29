@@ -848,7 +848,8 @@ INSERT INTO `navigation_items` (`id`, `title`, `url`, `icon`, `parent_id`) VALUE
 (13, 'Reports', '#reportsSubmenu', 'bi bi-bar-chart', NULL),
 (14, 'Portfolio at Risk (PAR)', 'par-reports.php', NULL, 13),
 (15, 'Performance Reports', 'performance-reports.php', NULL, 13),
-(16, 'Settings', 'settings.php', 'bi bi-gear', NULL);
+(16, 'Settings', 'settings.php', 'bi bi-gear', NULL),
+(17, 'Areas', 'areas.php', 'bi bi-gear', NULL,13);;
 
 -- --------------------------------------------------------
 
@@ -882,6 +883,7 @@ INSERT INTO `navigation_item_roles` (`navigation_item_id`, `role_id`) VALUES
 (14, 1),
 (15, 1),
 (16, 1),
+(17, 1),
 (1, 2),
 (2, 2),
 (3, 2),

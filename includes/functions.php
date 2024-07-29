@@ -197,16 +197,34 @@ function getLoanOfficers() {
 }
 
 function getNavigationItems($roleId) {
-    $conn = db_connect();
-    $stmt = $conn->prepare("
-        SELECT ni.id, ni.title, ni.url, ni.icon, ni.parent_id 
-        FROM navigation_items ni
-        INNER JOIN navigation_item_roles nir ON ni.id = nir.navigation_item_id
-        WHERE nir.role_id = :role_id
-    ");
-    $stmt->execute([':role_id' => $roleId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $conn = db_connect();
+        $stmt = $conn->prepare("
+            SELECT ni.id, ni.title, ni.url, ni.icon, ni.parent_id 
+            FROM navigation_items ni
+            INNER JOIN navigation_item_roles nir ON ni.id = nir.navigation_item_id
+            WHERE nir.role_id = :role_id
+        ");
+
+        // Execute the statement with the provided role ID
+        $stmt->execute([':role_id' => $roleId]);
+
+        // Fetch all results as an associative array
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Return the result, ensuring it’s always an array
+        return $result ?: [];
+
+    } catch (PDOException $e) {
+        // Log or handle the exception as needed
+        error_log('Database query error: ' . $e->getMessage());
+        return [];
+    } finally {
+        // Close the connection if it’s still open (if your db_connect function doesn't handle this automatically)
+        $conn = null;
+    }
 }
+
 
 function updateSettings($settings) {
     $conn = db_connect();
