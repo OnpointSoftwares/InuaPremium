@@ -1,72 +1,57 @@
 <?php
-include 'includes/db_connect.php';
+include '../includes/functions.php';
 // Get form data
-
-// Trial loan details
-$loan_product = "Personal Loan";
-$business_loan = "";
-$borrower = "John Doe";
-$loan_number = "LN12345";
-$custom_loan_number = "CLN123";
-$principal_amount = 5000.00;
-$disbursed_by = "Cash";
-$loan_release_date = "2024-08-01";
-$interest_amount = 500.00;
-$interest_method = "flat_rate";
-$loan_interest_percentage = 10.00;
-$loan_duration = 12; // Duration in months
-$repayment_cycle = "monthly";
-$number_of_repayments = 12;
-$automated_payments = 1;
-$extend_loan_after_maturity = 0;
-$processing_fee = 2.00;
-$registration_fee = 1.00;
-$loan_status = "open";
-$guarantors = "John Smith, Jane Doe";
-$loan_title = "John's Personal Loan";
-$description = "Loan for personal expenses.";
-$accounting_account = "cash";
-/*$loan_product = $_POST['loan_product'];
-$business_loan = $_POST['business_loan'];
-$borrower = $_POST['borrower'];
-$loan_number = $_POST['loan_number'];
-$custom_loan_number = $_POST['custom_loan_number'];
-$principal_amount = $_POST['principal_amount'];
-$disbursed_by = $_POST['disbursed_by'];
+$borrower=$_POST['borrower'];
+$loan_product = $_POST['loan_product'];
+$principal = $_POST['principal'];
 $loan_release_date = $_POST['loan_release_date'];
-$interest_amount = $_POST['interest_amount'];
+$interest = $_POST['interest'];
 $interest_method = $_POST['interest_method'];
-$loan_interest_percentage = $_POST['loan_interest_percentage'];
+$loan_interest = $_POST['loan_interest_percentage'];
 $loan_duration = $_POST['loan_duration'];
 $repayment_cycle = $_POST['repayment_cycle'];
 $number_of_repayments = $_POST['number_of_repayments'];
-$automated_payments = isset($_POST['automated_payments']) ? 1 : 0;
-$extend_loan_after_maturity = isset($_POST['extend_loan_after_maturity']) ? 1 : 0;
 $processing_fee = $_POST['processing_fee'];
 $registration_fee = $_POST['registration_fee'];
 $loan_status = $_POST['loan_status'];
-$guarantors = isset($_POST['guarantors']) ? implode(',', $_POST['guarantors']) : '';
-$loan_title = $_POST['loan_title'];
-$description = $_POST['description'];
-$accounting_account = $_POST['accounting_account'];*/
+$conn = db_connect();
 
-// Insert loan details into the database
-$sql = "INSERT INTO loan (loan_product, business_loan, borrower, loan_number, custom_loan_number, principal_amount, disbursed_by, loan_release_date, interest_amount, interest_method, loan_interest_percentage, loan_duration, repayment_cycle, number_of_repayments, automated_payments, extend_loan_after_maturity, processing_fee, registration_fee, loan_status, guarantors, loan_title, description, accounting_account) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+// Calculate total interest
+$total_interest = ($interest_method == 'percentage') 
+    ? ($loan_interest / 100) * $principal 
+    : $interest;
 
+$total_amount = $principal + $total_interest + ($processing_fee / 100 * $principal) + ($registration_fee / 100 * $principal);
+
+// Prepare SQL to insert loan application
+$sql = "INSERT INTO loan_applications 
+    (borrower,loan_product, principal, loan_release_date, interest, interest_method, loan_interest, loan_duration, repayment_cycle, number_of_repayments, processing_fee, registration_fee, loan_status, total_amount) 
+    VALUES (:borrower,:loan_product, :principal, :loan_release_date, :interest, :interest_method, :loan_interest, :loan_duration, :repayment_cycle, :number_of_repayments, :processing_fee, :registration_fee, :loan_status, :total_amount)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("sssssssisssssiiiddsss", $loan_product, $business_loan, $borrower, $loan_number, $custom_loan_number, $principal_amount, $disbursed_by, $loan_release_date, $interest_amount, $interest_method, $loan_interest_percentage, $loan_duration, $repayment_cycle, $number_of_repayments, $automated_payments, $extend_loan_after_maturity, $processing_fee, $registration_fee, $loan_status, $guarantors, $loan_title, $description, $accounting_account);
+$stmt->bindValue(':borrower', $borrower, PDO::PARAM_STR);
+$stmt->bindValue(':loan_product', $loan_product, PDO::PARAM_STR);
+$stmt->bindValue(':principal', $principal, PDO::PARAM_STR);
+$stmt->bindValue(':loan_release_date', $loan_release_date, PDO::PARAM_STR);
+$stmt->bindValue(':interest', $interest, PDO::PARAM_STR);
+$stmt->bindValue(':interest_method', $interest_method, PDO::PARAM_STR);
+$stmt->bindValue(':loan_interest', $loan_interest, PDO::PARAM_STR);
+$stmt->bindValue(':loan_duration', $loan_duration, PDO::PARAM_INT);
+$stmt->bindValue(':repayment_cycle', $repayment_cycle, PDO::PARAM_STR);
+$stmt->bindValue(':number_of_repayments', $number_of_repayments, PDO::PARAM_INT);
+$stmt->bindValue(':processing_fee', $processing_fee, PDO::PARAM_STR);
+$stmt->bindValue(':registration_fee', $registration_fee, PDO::PARAM_STR);
+$stmt->bindValue(':loan_status', $loan_status, PDO::PARAM_STR);
+$stmt->bindValue(':total_amount', $total_amount, PDO::PARAM_STR);
 
 if ($stmt->execute()) {
-    $loan_id = $stmt->insert_id;
-    // Generate repayment schedule
-    generateRepaymentSchedule($conn, $loan_id, $principal_amount, $interest_amount, $repayment_cycle, $number_of_repayments, $loan_release_date);
-    echo "Loan application submitted successfully.";
-} else {
-    echo "Error: " . $stmt->error;
-}
+    $loan_id = $conn->lastInsertId();
+    echo "New loan application submitted successfully";
 
-$stmt->close();
-$conn->close();
+    // Generate repayment schedule
+    generateRepaymentSchedule($conn, $loan_id, $principal, $total_interest, $repayment_cycle, $number_of_repayments, $loan_release_date);
+} else {
+    echo "Error: " . $stmt->errorInfo()[2];
+}
 
 function generateRepaymentSchedule($conn, $loan_id, $principal_amount, $interest_amount, $repayment_cycle, $number_of_repayments, $loan_release_date) {
     $start_date = new DateTime($loan_release_date);
@@ -74,20 +59,41 @@ function generateRepaymentSchedule($conn, $loan_id, $principal_amount, $interest
 
     // Calculate each repayment date based on the repayment cycle
     for ($i = 1; $i <= $number_of_repayments; $i++) {
-        $schedule_date = $start_date->modify('+' . $repayment_cycle)->format('Y-m-d');
+        $schedule_date = clone $start_date;
+        $schedule_date->modify('+' . getCycleInterval($repayment_cycle));
+
         $repayment_amount = calculateRepaymentAmount($principal_amount, $interest_amount, $number_of_repayments);
 
-        $sql = "INSERT INTO repayments (loan_id, repayment_date, amount) VALUES (?, ?, ?)";
+        $sql = "INSERT INTO repayments (loan_id, repayment_date, amount) VALUES (:loan_id, :repayment_date, :amount)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isd", $loan_id, $schedule_date, $repayment_amount);
+        $stmt->bindValue(':loan_id', $loan_id, PDO::PARAM_INT);
+        $stmt->bindValue(':repayment_date', $schedule_date->format('Y-m-d'), PDO::PARAM_STR);
+        $stmt->bindValue(':amount', $repayment_amount, PDO::PARAM_STR);
         $stmt->execute();
-        $stmt->close();
-    }
+    }?>
+    <script>
+    alert("Loan application successfull");
+    location.replace('index.php');
+    </script>
+    <?php
 }
 
 function calculateRepaymentAmount($principal_amount, $interest_amount, $number_of_repayments) {
-    // Simple example: evenly distributed repayments
+    // Calculate the total amount (principal + interest) and divide by the number of repayments
     $total_amount = $principal_amount + $interest_amount;
     return $total_amount / $number_of_repayments;
+}
+
+function getCycleInterval($cycle) {
+    switch ($cycle) {
+        case 'monthly':
+            return '1 month';
+        case 'quarterly':
+            return '3 months';
+        case 'annually':
+            return '1 year';
+        default:
+            return '1 month'; // Default to monthly if the cycle is unknown
+    }
 }
 ?>

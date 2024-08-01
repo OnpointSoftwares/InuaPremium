@@ -10,7 +10,7 @@
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
     <link href="assets/css/style.css" rel="stylesheet">
-  <style>
+    <style>
         .custom-form-section {
             margin-bottom: 30px;
         }
@@ -140,96 +140,167 @@
     </style>
 </head>
 <body>
-<?php 
-include '../includes/functions.php';
-include 'includes/header.php'; ?>
+    <?php 
+    include '../includes/functions.php';
+    include 'includes/header.php'; 
+    ?>
     <div class="sidebar">
         <?php include '../includes/sidebar.php'; ?>
     </div>
     <?php
+   
+    include 'db.php';
+    
+    $sql = "SELECT * FROM borrowers";
+    $result = $conn->query($sql);
+                
     $loanProducts = getLoanProducts();
     ?>
     <main class="main">
         <section class="section">
             <div class="container">
-<div class="container mt-5">
-               <form action="submit_loan_application.php" method="POST">
-                <!-- Loan Product -->
-                <div class="form-group">
-                    <label for="loanProduct">Loan Product</label>
-                    <select class="form-control" id="loanProduct" name="loan_product" required>
-                       <?php
-                        foreach ($loanProducts as $product) {
-                            echo "<option value={$product['id']}>{$product['name']}</option>";
-                        }
-                    ?>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="principal">Principal</label>
-                    <input type="number" class="form-control" id="principal" name="principal_amount" required>
-                </div>
-                <div class="form-group">
-                    <label for="loanReleaseDate">Loan Release Date</label>
-                    <input type="date" class="form-control" id="loanReleaseDate" name="loan_release_date" required>
-                </div>
-                <div class="form-group">
-                    <label for="interest">Interest</label>
-                    <input type="number" class="form-control" id="interest" name="interest_amount" required>
-                </div>
-                <div class="form-group">
-                    <label for="interestMethod">Interest Method</label>
-                    <select class="form-control" id="interestMethod" name="interest_method" required>
-                        <option value="flat_rate">Flat Rate</option>
-                        <option value="percentage">Percentage</option>
-                        <option value="fixed_amount">Fixed Amount Per Cycle</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="loanInterestPercentage">Loan Interest %</label>
-                    <input type="number" class="form-control" id="loanInterestPercentage" name="loan_interest_percentage" step="0.01">
-                </div>
-                <div class="form-group">
-                    <label for="loanDuration">Loan Duration (months)</label>
-                    <input type="number" class="form-control" id="loanDuration" name="loan_duration" required>
-                </div>
-                <div class="form-group">
-                    <label for="repaymentCycle">Repayment Cycle</label>
-                    <select class="form-control" id="repaymentCycle" name="repayment_cycle" required>
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="annually">Annually</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="numberOfRepayments">Number of Repayments</label>
-                    <input type="number" class="form-control" id="numberOfRepayments" name="number_of_repayments" required>
-                </div>
-                <div class="form-group">
-                    <label for="processingFee">Processing Fee %</label>
-                    <input type="number" class="form-control" id="processingFee" name="processing_fee" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="registrationFee">Registration Fee %</label>
-                    <input type="number" class="form-control" id="registrationFee" name="registration_fee" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <label for="loanStatus">Loan Status</label>
-                    <select class="form-control" id="loanStatus" name="loan_status" required>
-                        <option value="open">Open</option>
-                        <!-- Add more options if needed -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-success">Submit Loan Application</button>
-                </div>
-            </form>
+                <form action="submit_loan_application.php" method="POST" id="loanForm">
+                    <!-- Loan Product -->
+                    <div class="form-group">
+                        <label for="borrower">Borrower</label>
+                    <select class="form-control" name="borrower" id="borrower">
+                    <?php
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                echo " <option value=".$row["id"].">".$row["full_name"]."</option>";
+            }
+        } else {
+            echo "<option>No borrowers found</option>";
+        }
+        ?>
+        </select>
+    </div>
+                    <div class="form-group">
+                        <label for="loanProduct">Loan Product</label>
+                        <select class="form-control" id="loanProduct" name="loan_product" required>
+                            <?php
+                            foreach ($loanProducts as $product) {
+                                echo "<option value={$product['id']}>{$product['name']}</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="principal">Principal</label>
+                        <input type="number" class="form-control" id="principal" name="principal" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanReleaseDate">Loan Release Date</label>
+                        <input type="date" class="form-control" id="loanReleaseDate" name="loan_release_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="interest">Interest</label>
+                        <input type="number" class="form-control" id="interest" name="interest" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="interestMethod">Interest Method</label>
+                        <select class="form-control" id="interestMethod" name="interest_method" required>
+                            <option value="flat_rate">Flat Rate</option>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed_amount">Fixed Amount Per Cycle</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanInterestPercentage">Loan Interest %</label>
+                        <input type="number" class="form-control" id="loanInterestPercentage" name="loan_interest_percentage" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="loanDuration">Loan Duration (months)</label>
+                        <input type="number" class="form-control" id="loanDuration" name="loan_duration" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="repaymentCycle">Repayment Cycle</label>
+                        <select class="form-control" id="repaymentCycle" name="repayment_cycle" required>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="annually">Annually</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="numberOfRepayments">Number of Repayments</label>
+                        <input type="number" class="form-control" id="numberOfRepayments" name="number_of_repayments" required readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="processingFee">Processing Fee %</label>
+                        <input type="number" class="form-control" id="processingFee" name="processing_fee" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="registrationFee">Registration Fee %</label>
+                        <input type="number" class="form-control" id="registrationFee" name="registration_fee" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loanStatus">Loan Status</label>
+                        <select class="form-control" id="loanStatus" name="loan_status" required>
+                            <option value="open">Open</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalAmount">Total Amount</label>
+                        <input type="number" class="form-control" id="totalAmount" name="total_amount" readonly>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-success">Submit Loan Application</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
 
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const principalInput = document.getElementById('principal');
+            const interestInput = document.getElementById('interest');
+            const loanDurationInput = document.getElementById('loanDuration');
+            const repaymentCycleInput = document.getElementById('repaymentCycle');
+            const numberOfRepaymentsInput = document.getElementById('numberOfRepayments');
+            const processingFeeInput = document.getElementById('processingFee');
+            const registrationFeeInput = document.getElementById('registrationFee');
+            const totalAmountInput = document.getElementById('totalAmount');
 
-<!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+            function calculateRepayments() {
+                const principal = parseFloat(principalInput.value) || 0;
+                const interest = parseFloat(interestInput.value) || 0;
+                const duration = parseInt(loanDurationInput.value) || 0;
+                const cycle = repaymentCycleInput.value;
+                const processingFee = parseFloat(processingFeeInput.value) || 0;
+                const registrationFee = parseFloat(registrationFeeInput.value) || 0;
+
+                let repayments = 0;
+                if (cycle === 'monthly') {
+                    repayments = duration;
+                } else if (cycle === 'quarterly') {
+                    repayments = Math.ceil(duration / 3);
+                } else if (cycle === 'annually') {
+                    repayments = Math.ceil(duration / 12);
+                }
+
+                const totalInterest = (interest / 100) * principal * duration;
+                const totalProcessingFee = (processingFee / 100) * principal;
+                const totalRegistrationFee = (registrationFee / 100) * principal;
+                const totalAmount = principal + totalInterest + totalProcessingFee + totalRegistrationFee;
+
+                numberOfRepaymentsInput.value = repayments;
+                totalAmountInput.value = totalAmount.toFixed(2);
+            }
+
+            principalInput.addEventListener('input', calculateRepayments);
+            interestInput.addEventListener('input', calculateRepayments);
+            loanDurationInput.addEventListener('input', calculateRepayments);
+            repaymentCycleInput.addEventListener('change', calculateRepayments);
+            processingFeeInput.addEventListener('input', calculateRepayments);
+            registrationFeeInput.addEventListener('input', calculateRepayments);
+        });
+    </script>
+
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
 </body>
 </html>
