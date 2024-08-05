@@ -233,12 +233,7 @@
                         <label for="registrationFee">Registration Fee %</label>
                         <input type="number" class="form-control" id="registrationFee" name="registration_fee" step="0.01" required>
                     </div>
-                    <div class="form-group">
-                        <label for="loanStatus">Loan Status</label>
-                        <select class="form-control" id="loanStatus" name="loan_status" required>
-                            <option value="open">Open</option>
-                        </select>
-                    </div>
+                    
                     <div class="form-group">
                         <label for="totalAmount">Total Amount</label>
                         <input type="number" class="form-control" id="totalAmount" name="total_amount" readonly>

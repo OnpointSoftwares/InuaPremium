@@ -1,3 +1,6 @@
+<?php
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -151,6 +154,7 @@ include("includes/header.php");
 
     <h2>Add Borrower</h2>
     <form action="insert_borrower.php" method="post">
+    LoanOfficer: <input type="text" name="loanOfficer" value=<?php echo $_SESSION['email']; ?> class="form-control" required readonly><br>
         Full Name: <input type="text" name="full_name" class="form-control" required><br>
         Business Name: <input type="text" name="business_name" class="form-control"><br>
         Unique Number: <input type="text" name="unique_number" class="form-control" required><br>

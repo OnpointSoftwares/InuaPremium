@@ -105,6 +105,33 @@
     <?php 
     include '../includes/functions.php';
     include 'includes/header.php'; 
+
+    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        $role_id = $_POST['role_id'];
+        $permissions = isset($_POST['permissions']) ? $_POST['permissions'] : [];
+        
+        // Validate CSRF token
+        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+            die("CSRF token validation failed");
+        }
+
+        // Convert permissions array to comma-separated string
+        $permissions_str = implode(',', $permissions);
+
+        // Update the role permissions in the database
+        $sql = "UPDATE roles SET permissions = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param('si', $permissions_str, $role_id);
+
+        if ($stmt->execute()) {
+            echo "Role permissions updated successfully.";
+        } else {
+            echo "Error updating role permissions: " . $conn->error;
+        }
+        
+        $stmt->close();
+        $conn->close();
+    }
     ?>
     <div class="sidebar">
         <?php include '../includes/sidebar.php'; ?>
@@ -129,12 +156,12 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="text" name="role_name" value="<?php echo htmlspecialchars($role['name']); ?>"></td>
+                                <td><?php echo htmlspecialchars($role['name']); ?></td>
                                 <td>
                                     <ul>
                                         <?php
                                         foreach ($permissions as $permission) {
-                                            $checked = in_array($permission['id'], explode(',', $role['permissions'])) ? 'checked' : '';
+                                            $checked = in_array($permission['title'], explode(',', $role['permissions'])) ? 'checked' : '';
                                             echo "<li><input type='checkbox' name='permissions[]' value='".htmlspecialchars($permission['id'])."' $checked aria-label='".htmlspecialchars($permission['title'])."'> ".htmlspecialchars($permission['title'])."</li>";
                                         }
                                         ?>

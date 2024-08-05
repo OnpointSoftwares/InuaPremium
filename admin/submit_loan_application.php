@@ -13,7 +13,7 @@ $repayment_cycle = $_POST['repayment_cycle'];
 $number_of_repayments = $_POST['number_of_repayments'];
 $processing_fee = $_POST['processing_fee'];
 $registration_fee = $_POST['registration_fee'];
-$loan_status = $_POST['loan_status'];
+$loan_status = "pending";
 $conn = db_connect();
 
 // Calculate total interest

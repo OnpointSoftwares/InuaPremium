@@ -117,7 +117,7 @@ $roles = getRoles();
                                         <td><?php echo htmlspecialchars($officer['name']); ?></td>
                                         <td><?php echo htmlspecialchars($officer['email']); ?></td>
                                         <td><?php echo htmlspecialchars($officer['phone']); ?></td>
-                                        <td><?php echo getRole($officer['id'])['name']; ?></td>
+                                        <td><?php echo getRole($officer['role_id'])['name'];?></td>
                                         <td>
                                             <a href="edit_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-primary">Edit</a>
                                             <a href="delete_loan_officer.php?id=<?php echo htmlspecialchars($officer['id']); ?>" class="btn btn-danger">Delete</a>
