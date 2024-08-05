@@ -161,19 +161,54 @@ include("includes/header.php");
     <main class="main">
         <section id="admin-dashboard" class="admin-dashboard section">
             <div class="container">
+            <?php
+    include 'db.php';
+
+    // Query to get overdue repayments
+    $sql_overdue = "SELECT 
+                        borrowers.full_name AS borrower_name, 
+                        loan_applications.loan_product, 
+                        repayments.amount, 
+                        repayments.repayment_date
+                    FROM 
+                        repayments
+                    INNER JOIN 
+                        loan_applications ON repayments.loan_id = loan_applications.id
+                    INNER JOIN 
+                        borrowers ON loan_applications.borrower= borrowers.id
+                    WHERE 
+                        repayments.repayment_date < CURDATE()";
+
+    $result_overdue = $conn->query($sql_overdue);
+
+    // Query to calculate total loan amount and overdue amount for PAR
+    $sql_total_loan = "SELECT SUM(total_amount) AS total_loan_amount FROM loan_applications";
+    $result_total_loan = $conn->query($sql_total_loan);
+    $row_total_loan = $result_total_loan->fetch_assoc();
+    $total_loan_amount = $row_total_loan['total_loan_amount'];
+
+    $sql_overdue_amount = "SELECT SUM(repayments.amount) AS total_overdue_amount 
+                           FROM repayments 
+                           WHERE repayment_date < CURDATE() AND DATEDIFF(CURDATE(), repayment_date) > 30";
+    $result_overdue_amount = $conn->query($sql_overdue_amount);
+    $row_overdue_amount = $result_overdue_amount->fetch_assoc();
+    $total_overdue_amount = $row_overdue_amount['total_overdue_amount'];
+
+    $par = ($total_overdue_amount / $total_loan_amount) * 100;
+    ?>
                 <h1>Admin Dashboard</h1>
                 <div class="dashboard-metrics">
                     <div class="metric">
-                        <h2><?php echo $totalAreas; ?></h2>
+                        <h2>KSH<?php echo number_format($total_overdue_amount, 2); ?></h2>
                         <p>Total Areas</p>
                     </div>
                     <div class="metric">
-                        <h2><?php echo $totalDisbursedLoans; ?></h2>
+                        <h2>KSH<?php echo number_format($total_loan_amount, 2); ?></h2>
                         <p>Total Disbursed Loans</p>
                     </div>
                     <div class="metric">
-                        <h2><?php echo $portfolioAtRisk; ?></h2>
-                        <p>Portfolio at Risk</p>
+                        <h2> <?php echo number_format($par, 2); ?>%</h2>
+                        <p>Portofolio At Risk</p>
                     </div>
                 </div>
             </div>
