@@ -1,3 +1,4 @@
+<?php  session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -105,33 +106,83 @@
     <?php 
     include '../includes/functions.php';
     include 'includes/header.php'; 
-
+    include 'db.php'; 
+    // Handle form submissions
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $role_id = $_POST['role_id'];
-        $permissions = isset($_POST['permissions']) ? $_POST['permissions'] : [];
         
-        // Validate CSRF token
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die("CSRF token validation failed");
+
+        if (isset($_POST['add_permission'])) {
+            $new_role_id = $_POST['new_role_id'];
+            $new_nav_item_id = $_POST['new_nav_item_id'];
+
+            $sql = "INSERT INTO navigation_item_roles (navigation_item_id, role_id) VALUES (?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ii', $new_nav_item_id, $new_role_id);
+
+            if ($stmt->execute()) {
+                echo "Permission added successfully.";
+            } else {
+                echo "Error adding permission: " . $conn->error;
+            }
+            $stmt->close();
         }
 
-        // Convert permissions array to comma-separated string
-        $permissions_str = implode(',', $permissions);
+       // $conn->close();
+    
 
-        // Update the role permissions in the database
-        $sql = "UPDATE roles SET permissions = ? WHERE id = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param('si', $permissions_str, $role_id);
+        if (isset($_POST['update'])) {
+            $permissions = isset($_POST['permissions']) ? $_POST['permissions'] : [];
+            $permissions_str = implode(',', $permissions);
 
-        if ($stmt->execute()) {
-            echo "Role permissions updated successfully.";
-        } else {
-            echo "Error updating role permissions: " . $conn->error;
+            $sql = "UPDATE roles SET permissions = ? WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('si', $permissions_str, $role_id);
+
+            if ($stmt->execute()) {
+                echo "Role permissions updated successfully.";
+            } else {
+                echo "Error updating role permissions: " . $conn->error;
+            }
+            $stmt->close();
         }
-        
-        $stmt->close();
-        $conn->close();
+
+        if (isset($_POST['delete_role'])) {
+            $sql = "DELETE FROM roles WHERE id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('i', $role_id);
+
+            if ($stmt->execute()) {
+                echo "Role deleted successfully.";
+            } else {
+                echo "Error deleting role: " . $conn->error;
+            }
+            //$stmt->close();
+        }
+
+        if (isset($_POST['delete_permission'])) {
+            $permission_id = $_POST['permission_id'];
+
+            $sql = "DELETE FROM navigation_item_roles where navigation_item_id= ? AND role_id = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param('ii', $permission_id,$_SESSION['role']);
+
+            if ($stmt->execute()) {
+                echo "Permission deleted successfully.";
+            } else {
+                echo "Error deleting permission: " . $conn->error;
+            }
+            $stmt->close();
+        }
+
+        //$conn->close();
     }
+
+    // Fetch roles and permissions for display
+    $allroles = getRoles();
+    $allpermissions = getAllNavigationItems();
+    $role_id = $_SESSION['role'];
+    $role = getRole($role_id);
+    $permissions = getNavigationItems($role_id);
     ?>
     <div class="sidebar">
         <?php include '../includes/sidebar.php'; ?>
@@ -141,40 +192,67 @@
             <div class="container">
                 <h1>Staff Roles and Permissions</h1>
                 <form action='edit_roles.php' method='POST'>
-                    <?php 
-                    $role_id = $_POST['role_id'];
-                    $role = getRole($role_id);
-                    $permissions = getNavigationItems($role['id']);
-                    ?>
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Staff Role Name</th>
                                 <th>Permissions</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            
                             <tr>
-                                <td><?php echo htmlspecialchars($role['name']); ?></td>
+                                <td><?php echo $role['name']; ?></td>
                                 <td>
                                     <ul>
                                         <?php
+                                        //$role_permissions = explode(',', $role['permissions']);
                                         foreach ($permissions as $permission) {
-                                            $checked = in_array($permission['title'], explode(',', $role['permissions'])) ? 'checked' : '';
-                                            echo "<li><input type='checkbox' name='permissions[]' value='".htmlspecialchars($permission['id'])."' $checked aria-label='".htmlspecialchars($permission['title'])."'> ".htmlspecialchars($permission['title'])."</li>";
+                                            
+                                            echo "<li>
+                                                    <input type='checkbox' name='permissions[]' value='".htmlspecialchars($permission['id'])."' aria-label='".htmlspecialchars($permission['title'])."'> 
+                                                    ".htmlspecialchars($permission['title'])."
+                                                    <form action='edit_roles.php' method='POST' style='display:inline;'>
+                                                        <input type='hidden' name='permission_id' value='".htmlspecialchars($permission['id'])."'>
+                                                       
+                                                        <button type='submit' name='delete_permission' class='btn btn-danger btn-sm'>Delete</button>
+                                                    </form>
+                                                  </li>";
                                         }
                                         ?>
                                     </ul>
                                 </td>
                                 <td>
-                                    <input type="hidden" name="role_id" value="<?php echo htmlspecialchars($role_id); ?>">
-                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <input type="hidden" name="role_id" value="<?php echo htmlspecialchars($role['id']); ?>">
+                                    <button type="submit" name="update" class="btn btn-primary">Update</button>
+                                    <button type="submit" name="delete_role" class="btn btn-danger">Delete</button>
                                 </td>
                             </tr>
+                           
                         </tbody>
                     </table>
-                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+               </form>
+               <h2>Add New Permission</h2>
+                <form action="edit_roles.php" method="POST">
+                    <div class="form-group">
+                        <label for="new_role_id">Role:</label>
+                        <select id="new_role_id" name="new_role_id" class="form-control" required>
+                            
+                                <option value="1">Admin</option>
+                                <option value="2">Loan officer</option>
+                                <option value="3">Client</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_nav_item_id">Navigation Item:</label>
+                        <select id="new_nav_item_id" name="new_nav_item_id" class="form-control" required>
+                            <?php foreach ($allpermissions as $permission): ?>
+                                <option value="<?php echo htmlspecialchars($permission['id']); ?>"><?php echo htmlspecialchars($permission['title']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" name="add_permission" class="btn btn-primary">Add Permission</button>
                 </form>
             </div>
         </section>

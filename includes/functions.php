@@ -176,6 +176,19 @@ function getRoles() {
     $stmt = $conn->query("SELECT * FROM roles");
     return $stmt->fetchAll();
 }
+function getAllRoles() {
+    global $conn;
+    $sql = "SELECT * FROM roles";
+    $result = $conn->query($sql);
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function getAllNavigationItems() {
+    global $conn;
+    $sql = "SELECT * FROM navigation_items";
+    $result = $conn->query($sql);
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
 
 function getRole($id) {
     $conn = db_connect();
@@ -203,7 +216,7 @@ function getNavigationItems($roleId) {
             SELECT ni.id, ni.title, ni.url, ni.icon, ni.parent_id 
             FROM navigation_items ni
             INNER JOIN navigation_item_roles nir ON ni.id = nir.navigation_item_id
-            WHERE nir.role_id = :role_id
+            WHERE nir.role_id = :role_id ORDER BY ni.id ASC
         ");
 
         // Execute the statement with the provided role ID
