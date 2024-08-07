@@ -113,7 +113,34 @@
     </div>
     <?php
     include 'db.php';
-    
+
+    // Function to update loan status
+    function updateLoanStatus($loan_id, $status) {
+        global $conn;
+        $sql = "UPDATE loan_applications SET loan_status = ? WHERE id = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $status, $loan_id);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    // Check for approve or deny actions
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $loan_id = $_POST['loan_id'];
+        $action = $_POST['action'];
+        $status = ($action === 'approve') ? 'approved' : 'denied';
+
+        if (updateLoanStatus($loan_id, $status)) {
+            echo "<div class='alert alert-success'>Loan $action successfully.</div>";
+        } else {
+            echo "<div class='alert alert-danger'>Failed to $action the loan.</div>";
+        }
+    }
+
+    // Function to get loans
     function getLoans() {
         global $conn;
         $loans = array();
@@ -132,7 +159,8 @@
                     l.processing_fee, 
                     l.registration_fee, 
                     l.total_amount, 
-                    l.loan_release_date 
+                    l.loan_release_date,
+                    l.loan_status
                 FROM loan_applications l 
                 INNER JOIN borrowers b ON l.borrower = b.id 
                 INNER JOIN loan_products p ON l.loan_product = p.id";
@@ -161,6 +189,7 @@
         <section class="section">
             <div class="container">
                 <h1>Loan Applications</h1>
+                <a href="generate_pdf.php" class="btn btn-primary">Export Report as PDF</a>
                 <table class="table table-bordered">
                     <thead>
                         <tr>
@@ -178,6 +207,8 @@
                             <th>Registration Fee %</th>
                             <th>Total Amount</th>
                             <th>Loan Release Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -199,10 +230,23 @@
                                     <td>{$loan['registration_fee']}</td>
                                     <td>{$loan['total_amount']}</td>
                                     <td>{$loan['loan_release_date']}</td>
+                                    <td>{$loan['loan_status']}</td>
+                                    <td>
+                                        <form method='POST' style='display:inline-block;'>
+                                            <input type='hidden' name='loan_id' value='{$loan['id']}'>
+                                            <input type='hidden' name='action' value='approve'>
+                                            <button type='submit' class='btn btn-success btn-sm'>Approve</button>
+                                        </form>
+                                        <form method='POST' style='display:inline-block;'>
+                                            <input type='hidden' name='loan_id' value='{$loan['id']}'>
+                                            <input type='hidden' name='action' value='deny'>
+                                            <button type='submit' class='btn btn-danger btn-sm'>Deny</button>
+                                        </form>
+                                    </td>
                                 </tr>";
                             }
                         } else {
-                            echo "<tr><td colspan='14'>No loans found</td></tr>";
+                            echo "<tr><td colspan='15'>No loans found</td></tr>";
                         }
                         ?>
                     </tbody>

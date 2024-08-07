@@ -88,26 +88,10 @@
     <?php
     include 'db.php';
 
-    $sql_due = "SELECT 
-                borrowers.full_name AS borrower_name, 
-                loan_applications.loan_product, 
-                SUM(repayments.amount) AS total_amount_due, 
-                repayments.repayment_date
-            FROM 
-                repayments
-            INNER JOIN 
-                loan_applications ON repayments.loan_id = loan_applications.id
-            INNER JOIN 
-                borrowers ON loan_applications.borrower = borrowers.id
-            WHERE 
-                repayments.repayment_date >= CURDATE()
-            GROUP BY 
-                repayments.loan_id, 
-                borrowers.full_name, 
-                loan_applications.loan_product, 
-                repayments.repayment_date";
-    $result_due = $conn->query($sql_due);
+    // Get the number of overdue days from the request or default to 30
+    $days = isset($_GET['days']) ? (int)$_GET['days'] : 30;
 
+    // Query to get overdue repayments
     $sql_overdue = "SELECT 
                         borrowers.full_name AS borrower_name, 
                         loan_applications.loan_product, 
@@ -118,44 +102,50 @@
                     INNER JOIN 
                         loan_applications ON repayments.loan_id = loan_applications.id
                     INNER JOIN 
-                        borrowers ON loan_applications.borrower= borrowers.id
+                        borrowers ON loan_applications.borrower = borrowers.id
                     WHERE 
-                        repayments.repayment_date < CURDATE()";
+                        repayments.repayment_date < CURDATE() 
+                        AND DATEDIFF(CURDATE(), repayments.repayment_date) > $days";
 
     $result_overdue = $conn->query($sql_overdue);
     ?>
     <main class="main">
         <section class="section">
+            <!-- Form to select the number of overdue days -->
+            <form method="GET" action="">
+                <label for="days">Check overdue repayments for more than: </label>
+                <input type="number" name="days" id="days" min="1" value="<?php echo $days; ?>" onchange="this.form.submit()" class="form-control">
+                <span>days</span>
+            </form>
             
-                <div class="table-container">
-                    <h2>Overdue Repayments</h2>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Borrower</th>
-                                <th>Loan Product</th>
-                                <th>Amount Due</th>
-                                <th>Due Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result_overdue->num_rows > 0) {
-                                while($row = $result_overdue->fetch_assoc()) {
-                                    echo "<tr class='overdue'>
-                                            <td>{$row['borrower_name']}</td>
-                                            <td>{$row['loan_product']}</td>
-                                            <td>{$row['amount']}</td>
-                                            <td>{$row['repayment_date']}</td>
-                                          </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='4'>No overdue repayments found</td></tr>";
+            <div class="table-container">
+                <h2>Overdue Repayments > <?php echo $days; ?> days</h2>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Borrower</th>
+                            <th>Loan Product</th>
+                            <th>Amount Due</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($result_overdue->num_rows > 0) {
+                            while($row = $result_overdue->fetch_assoc()) {
+                                echo "<tr class='overdue'>
+                                        <td>{$row['borrower_name']}</td>
+                                        <td>{$row['loan_product']}</td>
+                                        <td>{$row['amount']}</td>
+                                        <td>{$row['repayment_date']}</td>
+                                      </tr>";
                             }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
+                        } else {
+                            echo "<tr><td colspan='4'>No overdue repayments found</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>

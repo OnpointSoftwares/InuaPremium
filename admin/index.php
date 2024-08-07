@@ -189,7 +189,7 @@ include("includes/header.php");
 
     $sql_overdue_amount = "SELECT SUM(repayments.amount) AS total_overdue_amount 
                            FROM repayments 
-                           WHERE repayment_date < CURDATE() AND DATEDIFF(CURDATE(), repayment_date) > 30";
+                           WHERE repayment_date < CURDATE()";
     $result_overdue_amount = $conn->query($sql_overdue_amount);
     $row_overdue_amount = $result_overdue_amount->fetch_assoc();
     $total_overdue_amount = $row_overdue_amount['total_overdue_amount'];
