@@ -127,7 +127,7 @@
         <section class="section">
             <form method="GET" action="">
                 <label for="days">Select overdue days:</label>
-                <select name="days" id="days" onchange="this.form.submit()" class="form-control">
+                <select name="days" id="days" onchange="this.form.submit()" class="form-control" hidden>
                     <option value="30" <?php if($days == 30) echo 'selected'; ?>>30 days</option>
                     <option value="60" <?php if($days == 60) echo 'selected'; ?>>60 days</option>
                     <option value="90" <?php if($days == 90) echo 'selected'; ?>>90 days</option>

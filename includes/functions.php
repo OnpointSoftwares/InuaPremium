@@ -182,6 +182,18 @@ function getAllRoles() {
     $result = $conn->query($sql);
     return $result->fetch_all(MYSQLI_ASSOC);
 }
+function getLoanOfficers() {
+    include 'db.php';
+    $sql = "SELECT * FROM users WHERE role_id = 2";
+    $result = $conn->query($sql);
+    $loanOfficers = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $loanOfficers[] = $row;
+        }
+    }
+    return $loanOfficers;
+}
 
 function getAllNavigationItems() {
     global $conn;
@@ -200,12 +212,6 @@ function getRole($id) {
 function getAreas() {
     $conn = db_connect();
     $stmt = $conn->query("SELECT * FROM areas");
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
-
-function getLoanOfficers() {
-    $conn = db_connect();
-    $stmt = $conn->query("SELECT * FROM users");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 

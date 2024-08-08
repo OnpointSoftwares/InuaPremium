@@ -17,7 +17,7 @@ try {
 			'allow_self_signed' => true,
 		)
 	  );
-	$mail->SMTPDebug = 2;									
+	$mail->SMTPDebug = 0;									
 	$mail->isSMTP();											
 	$mail->Host	 = 'smtp.gmail.com;';					
 	$mail->SMTPAuth = true;							
@@ -33,6 +33,12 @@ try {
 	$mail->AltBody = 'Body in plain text for non-HTML mail clients';
 	$mail->send();
 	echo "Mail has been sent successfully!";
+	?>
+
+	<script>
+		location.replace("admin.php");
+		</script>
+		<?php
 
 } catch (Exception $e) {
 	echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
