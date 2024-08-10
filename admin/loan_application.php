@@ -206,19 +206,34 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="interestCalculation">Interest Calculation</label>
+                        <select class="form-control" id="interestCalculation" name="interest_calculation" required>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="loanInterestPercentage">Loan Interest %</label>
                         <input type="number" class="form-control" id="loanInterestPercentage" name="loan_interest_percentage" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label for="loanDuration">Loan Duration (months)</label>
+                        <label for="loanDuration">Loan Duration</label>
                         <input type="number" class="form-control" id="loanDuration" name="loan_duration" required>
+                        <select class="form-control mt-2" id="loanDurationUnit" name="loan_duration_unit" required>
+                            <option value="days">Days</option>
+                            <option value="weeks">Weeks</option>
+                            <option value="months">Months</option>
+                            <option value="years">Years</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="repaymentCycle">Repayment Cycle</label>
                         <select class="form-control" id="repaymentCycle" name="repayment_cycle" required>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
                             <option value="monthly">Monthly</option>
-                            <option value="quarterly">Quarterly</option>
-                            <option value="annually">Annually</option>
+                            <option value="yearly">Yearly</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -239,63 +254,103 @@
                         <input type="number" class="form-control" id="totalAmount" name="total_amount" readonly>
                     </div>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-success">Submit Loan Application</button>
+                        <label for="repaymentAmount">Repayment Amount Per Cycle</label>
+                        <input type="number" class="form-control" id="repaymentAmount" name="repayment_amount" readonly>
+                    </div>
+                    <div class="form-group">
+                    <label for="idPhoto">Upload ID Photo</label>
+                    <input type="file" class="form-control" id="idPhoto" name="photo" accept="image/*" required>
+                    <small class="form-text text-muted">Please upload a clear photo of your ID.</small>
+                </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Submit</button>
                     </div>
                 </form>
             </div>
         </section>
     </main>
-
+    
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const principalInput = document.getElementById('principal');
-            const interestInput = document.getElementById('interest');
-            const loanDurationInput = document.getElementById('loanDuration');
-            const repaymentCycleInput = document.getElementById('repaymentCycle');
-            const numberOfRepaymentsInput = document.getElementById('numberOfRepayments');
-            const processingFeeInput = document.getElementById('processingFee');
-            const registrationFeeInput = document.getElementById('registrationFee');
-            const totalAmountInput = document.getElementById('totalAmount');
+        document.getElementById('loanForm').addEventListener('input', calculateLoanDetails);
 
-            function calculateRepayments() {
-                const principal = parseFloat(principalInput.value) || 0;
-                const interest = parseFloat(interestInput.value) || 0;
-                const duration = parseInt(loanDurationInput.value) || 0;
-                const cycle = repaymentCycleInput.value;
-                const processingFee = parseFloat(processingFeeInput.value) || 0;
-                const registrationFee = parseFloat(registrationFeeInput.value) || 0;
+        function calculateLoanDetails() {
+            var principal = parseFloat(document.getElementById('principal').value) || 0;
+            var loanDuration = parseFloat(document.getElementById('loanDuration').value) || 0;
+            var loanDurationUnit = document.getElementById('loanDurationUnit').value;
+            var interest = parseFloat(document.getElementById('interest').value) || 0;
+            var interestMethod = document.getElementById('interestMethod').value;
+            var interestCalculation = document.getElementById('interestCalculation').value;
+            var processingFee = parseFloat(document.getElementById('processingFee').value) || 0;
+            var registrationFee = parseFloat(document.getElementById('registrationFee').value) || 0;
+            var repaymentCycle = document.getElementById('repaymentCycle').value;
+            var loanInterestPercentage = parseFloat(document.getElementById('loanInterestPercentage').value) || 0;
 
-                let repayments = 0;
-                if (cycle === 'monthly') {
-                    repayments = duration;
-                } else if (cycle === 'quarterly') {
-                    repayments = Math.ceil(duration / 3);
-                } else if (cycle === 'annually') {
-                    repayments = Math.ceil(duration / 12);
-                }
+            var durationInWeeks = 0;
 
-                const totalInterest = (interest / 100) * principal * duration;
-                const totalProcessingFee = (processingFee / 100) * principal;
-                const totalRegistrationFee = (registrationFee / 100) * principal;
-                const totalAmount = principal + totalInterest + totalProcessingFee + totalRegistrationFee;
-
-                numberOfRepaymentsInput.value = repayments;
-                totalAmountInput.value = totalAmount.toFixed(2);
+            // Convert loan duration to weeks
+            switch (loanDurationUnit) {
+                case 'days':
+                    durationInWeeks = loanDuration / 7;
+                    break;
+                case 'weeks':
+                    durationInWeeks = loanDuration;
+                    break;
+                case 'months':
+                    durationInWeeks = loanDuration * 4;
+                    break;
+                case 'years':
+                    durationInWeeks = loanDuration * 52;
+                    break;
             }
 
-            principalInput.addEventListener('input', calculateRepayments);
-            interestInput.addEventListener('input', calculateRepayments);
-            loanDurationInput.addEventListener('input', calculateRepayments);
-            repaymentCycleInput.addEventListener('change', calculateRepayments);
-            processingFeeInput.addEventListener('input', calculateRepayments);
-            registrationFeeInput.addEventListener('input', calculateRepayments);
-        });
-    </script>
+            var numberOfRepayments = 0;
+            switch (repaymentCycle) {
+                case 'daily':
+                    numberOfRepayments = durationInWeeks * 7;
+                    break;
+                case 'weekly':
+                    numberOfRepayments = durationInWeeks;
+                    break;
+                case 'monthly':
+                    numberOfRepayments = durationInWeeks / 4;
+                    break;
+                case 'yearly':
+                    numberOfRepayments = durationInWeeks / 52;
+                    break;
+            }
 
-    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/vendor/aos/aos.js"></script>
-    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-    <script src="assets/js/main.js"></script>
+            // Calculate interest based on method and cycle
+            var totalInterest = 0;
+            switch (interestMethod) {
+                case 'flat_rate':
+                    totalInterest = (principal * loanInterestPercentage * loanDuration) / 100;
+                    break;
+                case 'percentage':
+                    switch (interestCalculation) {
+                        case 'weekly':
+                            totalInterest = (principal * (interest / 100)) * durationInWeeks;
+                            break;
+                        case 'monthly':
+                            totalInterest = (principal * (interest / 100)) * (durationInWeeks / 4);
+                            break;
+                        case 'yearly':
+                            totalInterest = (principal * (interest / 100)) * (durationInWeeks / 52);
+                            break;
+                    }
+                    break;
+                case 'fixed_amount':
+                    totalInterest = interest * numberOfRepayments;
+                    break;
+            }
+
+            var totalAmount = principal + totalInterest + processingFee + registrationFee;
+            var repaymentAmount = totalAmount / numberOfRepayments;
+
+            // Set the calculated values in the form
+            document.getElementById('numberOfRepayments').value = numberOfRepayments.toFixed(2);
+            document.getElementById('totalAmount').value = totalAmount.toFixed(2);
+            document.getElementById('repaymentAmount').value = repaymentAmount.toFixed(2);
+        }
+    </script>
 </body>
 </html>

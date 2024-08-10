@@ -133,11 +133,7 @@
         $sql = "UPDATE loan_applications SET loan_status = ? WHERE id = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $status, $loan_id);
-        if ($stmt->execute()) {
-            return true;
-        } else {
-            return false;
-        }
+        return $stmt->execute();
     }
 
     // Check for approve or deny actions
@@ -290,13 +286,8 @@
                                     <td>
                                         <form method='post' style='display:inline'>
                                             <input type='hidden' name='loan_id' value='{$loan['id']}'>
-                                            <input type='hidden' name='action' value='approve'>
-                                            <button type='submit' class='btn btn-success btn-sm'>Approve</button>
-                                        </form>
-                                        <form method='post' style='display:inline'>
-                                            <input type='hidden' name='loan_id' value='{$loan['id']}'>
-                                            <input type='hidden' name='action' value='deny'>
-                                            <button type='submit' class='btn btn-danger btn-sm'>Deny</button>
+                                            <button type='submit' name='action' value='approve' class='btn btn-success btn-sm'>Approve</button>
+                                            <button type='submit' name='action' value='deny' class='btn btn-danger btn-sm'>Deny</button>
                                         </form>
                                     </td>
                                 </tr>";
@@ -307,68 +298,62 @@
                         ?>
                     </tbody>
                 </table>
-            </div>
-            <div class="container mt-4">
+
                 <h2>Due Repayments</h2>
-                <div class="table-container">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Borrower Name</th>
-                                <th>Loan Product</th>
-                                <th>Total Amount Due</th>
-                                <th>Repayment Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result_due && $result_due->num_rows > 0) {
-                                while ($row_due = $result_due->fetch_assoc()) {
-                                    echo "<tr>
-                                        <td>{$row_due['borrower_name']}</td>
-                                        <td>{$row_due['loan_product']}</td>
-                                        <td>{$row_due['total_amount_due']}</td>
-                                        <td>{$row_due['repayment_date']}</td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='4'>No due repayments found.</td></tr>";
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Borrower</th>
+                            <th>Loan Product</th>
+                            <th>Total Amount Due</th>
+                            <th>Repayment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($result_due->num_rows > 0) {
+                            while($row = $result_due->fetch_assoc()) {
+                                echo "<tr>
+                                    <td>{$row['borrower_name']}</td>
+                                    <td>{$row['loan_product']}</td>
+                                    <td>{$row['total_amount_due']}</td>
+                                    <td>{$row['repayment_date']}</td>
+                                </tr>";
                             }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="container mt-4">
+                        } else {
+                            echo "<tr><td colspan='4'>No due repayments found.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+
                 <h2>Overdue Repayments</h2>
-                <div class="table-container">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Borrower Name</th>
-                                <th>Loan Product</th>
-                                <th>Amount</th>
-                                <th>Repayment Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            if ($result_overdue && $result_overdue->num_rows > 0) {
-                                while ($row_overdue = $result_overdue->fetch_assoc()) {
-                                    echo "<tr class='overdue'>
-                                        <td>{$row_overdue['borrower_name']}</td>
-                                        <td>{$row_overdue['loan_product']}</td>
-                                        <td>{$row_overdue['amount']}</td>
-                                        <td>{$row_overdue['repayment_date']}</td>
-                                    </tr>";
-                                }
-                            } else {
-                                echo "<tr><td colspan='4'>No overdue repayments found.</td></tr>";
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Borrower</th>
+                            <th>Loan Product</th>
+                            <th>Amount</th>
+                            <th>Repayment Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        if ($result_overdue->num_rows > 0) {
+                            while($row = $result_overdue->fetch_assoc()) {
+                                echo "<tr class='overdue'>
+                                    <td>{$row['borrower_name']}</td>
+                                    <td>{$row['loan_product']}</td>
+                                    <td>{$row['amount']}</td>
+                                    <td>{$row['repayment_date']}</td>
+                                </tr>";
                             }
-                            ?>
-                        </tbody>
-                    </table>
-                </div>
+                        } else {
+                            echo "<tr><td colspan='4'>No overdue repayments found.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>

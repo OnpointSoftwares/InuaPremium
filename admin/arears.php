@@ -87,73 +87,76 @@
         <?php include '../includes/sidebar.php'; ?>
     </div>
     <?php
-    include 'db.php';
+include 'db.php';
 
-    // Query to get overdue repayments
-    $sql_overdue = "SELECT 
-                        borrowers.full_name AS borrower_name, 
-                        loan_applications.loan_product, 
-                        repayments.amount, 
-                        repayments.repayment_date
-                    FROM 
-                        repayments
-                    INNER JOIN 
-                        loan_applications ON repayments.loan_id = loan_applications.id
-                    INNER JOIN 
-                        borrowers ON loan_applications.borrower = borrowers.id
-                    WHERE 
-                        repayments.repayment_date < CURDATE()";
+// Query to get overdue repayments grouped by loan_id
+$sql_overdue = "SELECT 
+                    borrowers.full_name AS borrower_name, 
+                    loan_applications.loan_product, 
+                    SUM(repayments.amount) AS total_amount_due, 
+                    MIN(repayments.repayment_date) AS earliest_due_date
+                FROM 
+                    repayments
+                INNER JOIN 
+                    loan_applications ON repayments.loan_id = loan_applications.id
+                INNER JOIN 
+                    borrowers ON loan_applications.borrower = borrowers.id
+                WHERE 
+                    repayments.repayment_date < CURDATE()
+                GROUP BY 
+                    repayments.loan_id";
 
-    $result_overdue = $conn->query($sql_overdue);
+$result_overdue = $conn->query($sql_overdue);
 
-    // Query to calculate total loan amount and overdue amount for PAR
-    $sql_total_loan = "SELECT SUM(total_amount) AS total_loan_amount FROM loan_applications";
-    $result_total_loan = $conn->query($sql_total_loan);
-    $row_total_loan = $result_total_loan->fetch_assoc();
-    $total_loan_amount = $row_total_loan['total_loan_amount'];
+// Query to calculate total loan amount and overdue amount for PAR
+$sql_total_loan = "SELECT SUM(total_amount) AS total_loan_amount FROM loan_applications";
+$result_total_loan = $conn->query($sql_total_loan);
+$row_total_loan = $result_total_loan->fetch_assoc();
+$total_loan_amount = $row_total_loan['total_loan_amount'];
 
-    $sql_overdue_amount = "SELECT SUM(repayments.amount) AS total_overdue_amount 
-                           FROM repayments 
-                           WHERE repayment_date < CURDATE() AND DATEDIFF(CURDATE(), repayment_date) > 30";
-    $result_overdue_amount = $conn->query($sql_overdue_amount);
-    $row_overdue_amount = $result_overdue_amount->fetch_assoc();
-    $total_overdue_amount = $row_overdue_amount['total_overdue_amount'];
+$sql_overdue_amount = "SELECT SUM(repayments.amount) AS total_overdue_amount 
+                       FROM repayments 
+                       WHERE repayment_date < CURDATE() AND DATEDIFF(CURDATE(), repayment_date) > 30";
+$result_overdue_amount = $conn->query($sql_overdue_amount);
+$row_overdue_amount = $result_overdue_amount->fetch_assoc();
+$total_overdue_amount = $row_overdue_amount['total_overdue_amount'];
 
-    $par = ($total_overdue_amount / $total_loan_amount) * 100;
-    ?>
-    <main class="main">
-        <section class="section">
-            <div class="table-container">
-                <h2>Arears</h2>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Borrower</th>
-                            <th>Loan Product</th>
-                            <th>Amount Due</th>
-                            <th>Due Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-                        if ($result_overdue->num_rows > 0) {
-                            while($row = $result_overdue->fetch_assoc()) {
-                                echo "<tr class='overdue'>
-                                        <td>{$row['borrower_name']}</td>
-                                        <td>{$row['loan_product']}</td>
-                                        <td>{$row['amount']}</td>
-                                        <td>{$row['repayment_date']}</td>
-                                      </tr>";
-                            }
-                        } else {
-                            echo "<tr><td colspan='4'>No overdue repayments found</td></tr>";
+$par = ($total_overdue_amount / $total_loan_amount) * 100;
+?>
+<main class="main">
+    <section class="section">
+        <div class="table-container">
+            <h2>Arrears</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Borrower</th>
+                        <th>Loan Product</th>
+                        <th>Total Amount Due</th>
+                        <th>Earliest Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    if ($result_overdue->num_rows > 0) {
+                        while($row = $result_overdue->fetch_assoc()) {
+                            echo "<tr class='overdue'>
+                                    <td>{$row['borrower_name']}</td>
+                                    <td>{$row['loan_product']}</td>
+                                    <td>{$row['total_amount_due']}</td>
+                                    <td>{$row['earliest_due_date']}</td>
+                                  </tr>";
                         }
-                        ?>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
+                    } else {
+                        echo "<tr><td colspan='4'>No overdue repayments found</td></tr>";
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
 
     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="assets/vendor/aos/aos.js"></script>

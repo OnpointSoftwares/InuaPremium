@@ -177,12 +177,12 @@ include("includes/header.php");
                     INNER JOIN 
                         borrowers ON loan_applications.borrower= borrowers.id
                     WHERE 
-                        repayments.repayment_date < CURDATE()";
+                        repayments.repayment_date < CURDATE()AND l.loan_status='approved'";
 
     $result_overdue = $conn->query($sql_overdue);
 
     // Query to calculate total loan amount and overdue amount for PAR
-    $sql_total_loan = "SELECT SUM(total_amount) AS total_loan_amount FROM loan_applications";
+    $sql_total_loan = "SELECT SUM(total_amount) AS total_loan_amount FROM loan_applications where loan_status='approved'";
     $result_total_loan = $conn->query($sql_total_loan);
     $row_total_loan = $result_total_loan->fetch_assoc();
     $total_loan_amount = $row_total_loan['total_loan_amount'];
