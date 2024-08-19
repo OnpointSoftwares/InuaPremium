@@ -2,7 +2,7 @@
 include_once("../includes/functions.php");
 
 // Get the list of loan officers, areas, and roles
-$loanOfficers = getLoanOfficers();
+$loanOfficers = getStaff();
 $areas = getAreas(); // Assuming getAreas function is defined similarly
 $roles = getRoles();
 ?>

@@ -194,7 +194,18 @@ function getLoanOfficers() {
     }
     return $loanOfficers;
 }
-
+function getStaff() {
+    include 'db.php';
+    $sql = "SELECT * FROM users";
+    $result = $conn->query($sql);
+    $loanOfficers = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $loanOfficers[] = $row;
+        }
+    }
+    return $loanOfficers;
+}
 function getAllNavigationItems() {
     global $conn;
     $sql = "SELECT * FROM navigation_items";

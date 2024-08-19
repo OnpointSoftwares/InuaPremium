@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -49,7 +50,8 @@
             text-decoration: none;
         }
 
-        .header .navmenu ul li a.active, .header .navmenu ul li a:hover {
+        .header .navmenu ul li a.active,
+        .header .navmenu ul li a:hover {
             color: #e84545;
         }
 
@@ -70,7 +72,8 @@
             display: block;
         }
 
-        .sidebar .nav-item .nav-link.active, .sidebar .nav-item .nav-link:hover {
+        .sidebar .nav-item .nav-link.active,
+        .sidebar .nav-item .nav-link:hover {
             color: #e84545;
         }
 
@@ -103,6 +106,7 @@
         }
     </style>
 </head>
+
 <body>
     <?php 
     include '../includes/functions.php';
@@ -242,6 +246,11 @@
                                             <input type='hidden' name='action' value='deny'>
                                             <button type='submit' class='btn btn-danger btn-sm'>Deny</button>
                                         </form>
+                                        <!-- Add Guarantors Button -->
+                                        <form method='GET' action='manage_guarantors.php' style='display:inline-block;'>
+                                            <input type='hidden' name='loan_id' value='{$loan['id']}'>
+                                            <button type='submit' class='btn btn-warning btn-sm'>Add Guarantors</button>
+                                        </form>
                                     </td>
                                 </tr>";
                             }
@@ -261,4 +270,5 @@
     <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>
