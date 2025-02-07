@@ -1,4 +1,6 @@
 <?php
+ini_set('display_errors', 1); 
+ini_set('display_startup_errors', 1); error_reporting(E_ALL);
 include '../includes/functions.php';
 include 'db.php'; // Ensure this path is correct
 
@@ -20,32 +22,7 @@ $loan_status = "pending";
 
 // Handle ID photo upload
 $id_photo = $_FILES['photo'];
-$target_dir = "uploads/id_photos/";
-$unique_name = uniqid() . '_' . basename($id_photo["name"]);
-$target_file = $target_dir . $unique_name;
-$imageFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-// Check if image file is an actual image
-$check = getimagesize($id_photo["tmp_name"]);
-if ($check === false) {
-    die("File is not an image.");
-}
-
-// Check file size (optional, e.g., limit to 5MB)
-if ($id_photo["size"] > 5000000) {
-    die("Sorry, your file is too large.");
-}
-
-// Allow certain file formats (optional)
-$allowed_types = ["jpg", "jpeg", "png", "gif"];
-if (!in_array($imageFileType, $allowed_types)) {
-    die("Sorry, only JPG, JPEG, PNG & GIF files are allowed.");
-}
-
-// Move the uploaded file to the target directory
-if (!move_uploaded_file($id_photo["tmp_name"], $target_file)) {
-    die("Sorry, there was an error uploading your file.");
-}
 
 $conn = db_connect();
 

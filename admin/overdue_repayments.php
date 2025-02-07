@@ -1,3 +1,7 @@
+<?php
+ini_set('display_errors', 1); 
+ini_set('display_startup_errors', 1); error_reporting(E_ALL);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -96,7 +100,7 @@
                         borrowers.full_name AS borrower_name, 
                         loan_applications.loan_product, 
                         repayments.amount, 
-                        repayments.repayment_date
+                        repayments.repayment_date,repayments.paid
                     FROM 
                         repayments
                     INNER JOIN 
@@ -132,14 +136,17 @@
                     <tbody>
                         <?php
                         if ($result_overdue->num_rows > 0) {
-                            while($row = $result_overdue->fetch_assoc()) {
+                            while ($row = $result_overdue->fetch_assoc()) {
+                                $diff=$row['amount']-$row['paid'];
+                                if($diff>1)
+                                {
                                 echo "<tr class='overdue'>
                                         <td>{$row['borrower_name']}</td>
                                         <td>{$row['loan_product']}</td>
-                                        <td>{$row['amount']}</td>
-                                        <td>{$row['repayment_date']}</td>
-                                      </tr>";
+                                        <td>{$diff}</td>
+                                        <td>{$row['repayment_date']}</td></tr>";
                             }
+                        }
                         } else {
                             echo "<tr><td colspan='4'>No overdue repayments found</td></tr>";
                         }
