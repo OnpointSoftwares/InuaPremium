@@ -1,8 +1,12 @@
 <?php
-ini_set('display_errors', 1); 
-ini_set('display_startup_errors', 1); error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include '../includes/functions.php';
 include 'db.php'; // Ensure this path is correct
+
+$conn = db_connect();
 
 // Get form data
 $borrower = $_POST['borrower'];
@@ -21,10 +25,20 @@ $registration_fee = $_POST['registration_fee'];
 $loan_status = "pending";
 
 // Handle ID photo upload
+$upload_dir = '../assets/img/'; // Ensure this directory exists and is writable
 $id_photo = $_FILES['photo'];
+$target_file = $upload_dir . basename($id_photo['name']); // Full file path
 
+if (!file_exists($upload_dir)) {
+    mkdir($upload_dir, 0775, true); // Ensure directory exists
+}
 
-$conn = db_connect();
+if (move_uploaded_file($id_photo['tmp_name'], $target_file)) {
+    echo "File uploaded successfully.";
+} else {
+    echo "Error uploading file.";
+    exit; // Stop execution if file upload fails
+}
 
 // Calculate total interest
 $total_interest = 0;
@@ -33,29 +47,33 @@ switch ($interest_method) {
         $total_interest = ($principal * $loan_interest_percentage * $loan_duration) / 100;
         break;
     case 'percentage':
+        $duration_in_weeks = getDurationInWeeks($loan_duration, $loan_duration_unit);
+        $interest_per_period = $principal * ($loan_interest_percentage / 100);
+        
         switch ($_POST['interest_calculation']) {
             case 'weekly':
-                $total_interest = ($principal * ($interest / 100)) * (getDurationInWeeks($loan_duration, $loan_duration_unit));
+                $total_interest = $interest_per_period * $duration_in_weeks;
                 break;
             case 'monthly':
-                $total_interest = ($principal * ($interest / 100)) * (getDurationInWeeks($loan_duration, $loan_duration_unit) / 4);
+                $total_interest = $interest_per_period * ($duration_in_weeks / 4); // assuming 4 weeks per month
                 break;
             case 'yearly':
-                $total_interest = ($principal * ($interest / 100)) * (getDurationInWeeks($loan_duration, $loan_duration_unit) / 52);
+                $total_interest = $interest_per_period * ($duration_in_weeks / 52); // assuming 52 weeks per year
                 break;
         }
         break;
     case 'fixed_amount':
-        $total_interest = $interest * $number_of_repayments;
+        $total_interest = $loan_interest_percentage * $number_of_repayments;
         break;
 }
 
-$total_amount = $principal + $total_interest + ($processing_fee / 100 * $principal) + ($registration_fee / 100 * $principal);
-
+$total_amount_inclusive = $principal + $total_interest + $processing_fee + $registration_fee;
+$total_amount=$principal + $total_interest;
 // Prepare SQL to insert loan application
 $sql = "INSERT INTO loan_applications 
-    (borrower, loan_product, principal, loan_release_date, interest, interest_method, loan_interest, loan_duration, repayment_cycle, number_of_repayments, processing_fee, registration_fee, loan_status, total_amount, id_photo_path) 
-    VALUES (:borrower, :loan_product, :principal, :loan_release_date, :interest, :interest_method, :loan_interest, :loan_duration, :repayment_cycle, :number_of_repayments, :processing_fee, :registration_fee, :loan_status, :total_amount, :id_photo_path)";
+    (borrower, loan_product, principal, loan_release_date, interest, interest_method, loan_interest, loan_duration, repayment_cycle, number_of_repayments, processing_fee, registration_fee, loan_status, total_amount,total_amount_inclusive, id_photo_path) 
+    VALUES (:borrower, :loan_product, :principal, :loan_release_date, :interest, :interest_method, :loan_interest, :loan_duration, :repayment_cycle, :number_of_repayments, :processing_fee, :registration_fee, :loan_status, :total_amount,:total_amount_inclusive, :id_photo_path)";
+
 $stmt = $conn->prepare($sql);
 $stmt->bindValue(':borrower', $borrower, PDO::PARAM_STR);
 $stmt->bindValue(':loan_product', $loan_product, PDO::PARAM_STR);
@@ -71,6 +89,7 @@ $stmt->bindValue(':processing_fee', $processing_fee, PDO::PARAM_STR);
 $stmt->bindValue(':registration_fee', $registration_fee, PDO::PARAM_STR);
 $stmt->bindValue(':loan_status', $loan_status, PDO::PARAM_STR);
 $stmt->bindValue(':total_amount', $total_amount, PDO::PARAM_STR);
+$stmt->bindValue(':total_amount_inclusive', $total_amount_inclusive, PDO::PARAM_STR);
 $stmt->bindValue(':id_photo_path', $target_file, PDO::PARAM_STR); // Store file path
 
 if ($stmt->execute()) {
@@ -83,6 +102,7 @@ if ($stmt->execute()) {
     echo "Error: " . $stmt->errorInfo()[2];
 }
 
+// Function to convert loan duration to weeks
 function getDurationInWeeks($loan_duration, $loan_duration_unit) {
     switch ($loan_duration_unit) {
         case 'days':
@@ -90,17 +110,17 @@ function getDurationInWeeks($loan_duration, $loan_duration_unit) {
         case 'weeks':
             return $loan_duration;
         case 'months':
-            return $loan_duration * 4;
+            return $loan_duration * 4; // Assuming 4 weeks per month
         case 'years':
-            return $loan_duration * 52;
+            return $loan_duration * 52; // Assuming 52 weeks per year
         default:
             return 0;
     }
 }
 
+// Function to generate repayment schedule
 function generateRepaymentSchedule($conn, $loan_id, $principal_amount, $interest_amount, $repayment_cycle, $number_of_repayments, $loan_release_date) {
     $start_date = new DateTime($loan_release_date);
-    $schedule = [];
 
     // Calculate each repayment date based on the repayment cycle
     for ($i = 1; $i <= $number_of_repayments; $i++) {
@@ -126,12 +146,13 @@ function generateRepaymentSchedule($conn, $loan_id, $principal_amount, $interest
     <?php
 }
 
+// Function to calculate repayment amount
 function calculateRepaymentAmount($principal_amount, $interest_amount, $number_of_repayments) {
-    // Calculate the total amount (principal + interest) and divide by the number of repayments
-    $total_amount = $principal_amount + $interest_amount;
-    return $total_amount / $number_of_repayments;
+    $total_amount = $principal_amount + $interest_amount; // Make sure both principal and interest are considered
+    return $total_amount / $number_of_repayments; // Repayments are evenly split
 }
 
+// Function to get cycle interval for repayments
 function getCycleInterval($cycle) {
     switch ($cycle) {
         case 'daily':
@@ -143,7 +164,7 @@ function getCycleInterval($cycle) {
         case 'yearly':
             return '1 year';
         default:
-            return '1 month'; // Default to monthly if the cycle is unknown
+            return '1 month'; // Default to monthly if unspecified
     }
 }
 ?>

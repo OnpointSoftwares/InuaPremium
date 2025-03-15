@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 include '../includes/functions.php'; // Ensure this file contains necessary database connection functions
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_FILES['company_logo']) && $_FILES['company_logo']['error'] == UPLOAD_ERR_OK) {
         $targetDir = '../assets/img/';
         $targetFile = $targetDir . basename($_FILES['company_logo']['name']);
+
         move_uploaded_file($_FILES['company_logo']['tmp_name'], $targetFile);
         $logoPath = basename($_FILES['company_logo']['name']);
     }

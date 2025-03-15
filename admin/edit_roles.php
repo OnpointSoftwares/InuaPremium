@@ -121,6 +121,11 @@
 
             if ($stmt->execute()) {
                 echo "Permission added successfully.";
+                ?>
+                <script>
+                location.replace("staff_role_permission.php");
+                </script>
+                <?php
             } else {
                 echo "Error adding permission: " . $conn->error;
             }
@@ -140,6 +145,7 @@
 
             if ($stmt->execute()) {
                 echo "Role permissions updated successfully.";
+                header(location:"staff_role_permission.php");
             } else {
                 echo "Error updating role permissions: " . $conn->error;
             }
@@ -152,9 +158,16 @@
             $stmt->bind_param('i', $role_id);
 
             if ($stmt->execute()) {
-                echo "Role deleted successfully.";
+               
+                ?>
+                <script>
+                     alert("Role deleted successfully.");
+                location.replace("staff_role_permission.php");
+                </script>
+                <?php
             } else {
                 echo "Error deleting role: " . $conn->error;
+                 echo "Role deleted successfully.";
             }
             //$stmt->close();
         }
@@ -170,6 +183,12 @@
                 echo "Permission deleted successfully.";
             } else {
                 echo "Error deleting permission: " . $conn->error;
+                ?>
+                <script>
+                     alert("Role deleted failed.");
+                location.replace("staff_role_permission.php");
+                </script>
+                <?php
             }
             $stmt->close();
         }
@@ -180,9 +199,20 @@
     // Fetch roles and permissions for display
     $allroles = getRoles();
     $allpermissions = getAllNavigationItems();
-    $role_id = $_SESSION['role'];
+    // Check if 'role' is set in POST, and handle properly
+if (isset($_POST['role_id']) && !empty($_POST['role_id'])) {
+    $role_id = $_POST['role_id']; // Use 'role' from the form submission
+    //echo "<script>alert('this ".$role_id."');</script>"; // Optional: For debugging purposes
+
+    // Fetch the role using the role_id
     $role = getRole($role_id);
+
+    // Fetch permissions related to the role
     $permissions = getNavigationItems($role_id);
+} else {
+    // Handle case where role is not provided
+    echo "<script>alert('Role ID is not provided or is invalid.');</script>";
+}
     ?>
     <div class="sidebar">
         <?php include '../includes/sidebar.php'; ?>
@@ -242,6 +272,7 @@
                                 <option value="1">Admin</option>
                                 <option value="2">Loan officer</option>
                                 <option value="3">Client</option>
+                                <option value="4">Manager</option>
                         </select>
                     </div>
                     <div class="form-group">

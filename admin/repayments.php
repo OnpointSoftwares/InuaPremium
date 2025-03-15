@@ -243,7 +243,10 @@ include 'db.php';
                         </thead>
                         <tbody>
                             <?php while ($row = $result_due->fetch_assoc()) : ?>
-                                
+                                <?php $diff=$row['amount']-$row['paid'];
+                                if($diff>0)
+                                {
+                                ?>
                                 <tr>
                                 
                                     <td><?php echo htmlspecialchars($row['full_name']); ?></td>
@@ -251,6 +254,7 @@ include 'db.php';
                                     <td><?php echo number_format($row['total_amount_due'], 2); ?></td>
                                     <td><?php echo htmlspecialchars($row['repayment_date']); ?></td>
                                 </tr>
+                                <?php } ?>
                             <?php endwhile; ?>
                             <?php if ($result_due->num_rows === 0) echo "<tr><td colspan='4'>No due repayments found</td></tr>"; ?>
                         </tbody>
@@ -278,7 +282,7 @@ include 'db.php';
                                 <tr>
                                     <td><?php echo htmlspecialchars($row['full_name']); ?></td>
                                     <td><?php echo htmlspecialchars($row['loan_product']); ?></td>
-                                    <td><?php echo $diff ?></td>
+                                    <td><?php echo $diff." KES"?></td>
                                     <td><?php echo htmlspecialchars($row['repayment_date']); ?></td>
                                 </tr>
                                 <?php } ?>

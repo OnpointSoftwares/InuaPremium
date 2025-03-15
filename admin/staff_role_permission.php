@@ -192,8 +192,10 @@
                             </td>
                             <td>
                             <form action='edit_roles.php' method='POST'>   
-                                <input type="hidden" name='role_id' value=<?php echo $role['id']; ?>>
-                            <button type='submit' class="btn">Edit</button></td>
+    <input type="hidden" name="role_id" value="<?php echo $role['id'] ?>">
+    <button type="submit" class="btn">Edit</button>
+</form>
+</td>
                         </tr>
                                            <?php
                                         }

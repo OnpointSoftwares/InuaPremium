@@ -1,9 +1,8 @@
 <?php
 require_once('TCPDF/tcpdf.php'); // Include the TCPDF library
-
 include 'db.php';
 
-// Function to get loans
+// Function to fetch loan data
 function getLoans() {
     global $conn;
     $loans = array();
@@ -35,23 +34,24 @@ function getLoans() {
         return $loans;
     }
 
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-            $loans[] = $row;
-        }
-    } else {
-        echo "No records found.";
+    while ($row = $result->fetch_assoc()) {
+        $loans[] = $row;
     }
-
     return $loans;
 }
 
 $loans = getLoans();
 
+// Extend TCPDF class for custom header and footer
 class PDF extends TCPDF {
     public function Header() {
-        $this->SetFont('helvetica', 'B', 12);
+        $image_file = 'assets/img/logo.png'; // Ensure correct path
+        if (file_exists($image_file)) {
+            $this->Image($image_file, 15, 8, 25); // Adjust position and size
+        }
+        $this->SetFont('helvetica', 'B', 16);
         $this->Cell(0, 15, 'Loan Applications Report', 0, 1, 'C');
+        $this->Ln(5); // Line break
     }
 
     public function Footer() {
@@ -61,23 +61,26 @@ class PDF extends TCPDF {
     }
 }
 
-// Create a new PDF document
+// Create new PDF document
 $pdf = new PDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
-
-// Set document information
 $pdf->SetCreator(PDF_CREATOR);
-$pdf->SetAuthor('Your Name');
+$pdf->SetAuthor('Inua Premium');
 $pdf->SetTitle('Loan Applications Report');
 $pdf->SetSubject('Report');
 $pdf->SetKeywords('TCPDF, PDF, report, loan');
-
-// Add a page
 $pdf->AddPage();
-
-// Set font
 $pdf->SetFont('helvetica', '', 10);
 
-$html = '<table border="1" cellspacing="3" cellpadding="4">
+// Table styling
+$html = '<style>
+            table { border-collapse: collapse; width: 100%; font-size: 10pt; }
+            th, td { border: 1px solid #000; padding: 5px; text-align: center; }
+            th { background-color: #4CAF50; color: white; }
+            tr:nth-child(even) { background-color: #f2f2f2; }
+            tr:hover { background-color: #ddd; }
+        </style>';
+
+$html .= '<table>
             <thead>
                 <tr>
                     <th>ID</th>
@@ -93,13 +96,11 @@ $html = '<table border="1" cellspacing="3" cellpadding="4">
                     <th>Processing Fee %</th>
                     <th>Registration Fee %</th>
                     <th>Total Amount</th>
-                    <th>Loan Release Date</th>
-                    <th>Status</th>
                 </tr>
             </thead>
             <tbody>';
 
-if (count($loans) > 0) {
+if (!empty($loans)) {
     foreach ($loans as $loan) {
         $html .= "<tr>
                     <td>{$loan['id']}</td>
@@ -115,20 +116,18 @@ if (count($loans) > 0) {
                     <td>{$loan['processing_fee']}</td>
                     <td>{$loan['registration_fee']}</td>
                     <td>{$loan['total_amount']}</td>
-                    <td>{$loan['loan_release_date']}</td>
-                    <td>{$loan['loan_status']}</td>
                 </tr>";
     }
 } else {
-    $html .= "<tr><td colspan='15'>No loans found</td></tr>";
+    $html .= "<tr><td colspan='13' style='text-align:center; font-weight: bold;'>No loans found</td></tr>";
 }
 
 $html .= '</tbody></table>';
 
+// Write the HTML table to the PDF
 $pdf->writeHTML($html, true, false, true, false, '');
-
 $pdf->lastPage();
 
-// Close and output PDF document
+// Output PDF
 $pdf->Output('loan_applications_report.pdf', 'I');
 ?>

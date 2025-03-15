@@ -159,7 +159,7 @@
     <main class="main">
         <section class="section">
             <div class="container">
-                <form action="submit_loan_application.php" method="POST" id="loanForm">
+                <form action="submit_loan_application.php" method="POST" id="loanForm" enctype="multipart/form-data">
                     <!-- Loan Product -->
                     <div class="form-group">
                         <label for="borrower">Borrower</label>
@@ -192,10 +192,6 @@
                     <div class="form-group">
                         <label for="loanReleaseDate">Loan Release Date</label>
                         <input type="date" class="form-control" id="loanReleaseDate" name="loan_release_date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="interest">Interest</label>
-                        <input type="number" class="form-control" id="interest" name="interest" required>
                     </div>
                     <div class="form-group">
                         <label for="interestMethod">Interest Method</label>
@@ -241,17 +237,21 @@
                         <input type="number" class="form-control" id="numberOfRepayments" name="number_of_repayments" required readonly>
                     </div>
                     <div class="form-group">
-                        <label for="processingFee">Processing Fee %</label>
+                        <label for="processingFee">Processing Fee</label>
                         <input type="number" class="form-control" id="processingFee" name="processing_fee" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label for="registrationFee">Registration Fee %</label>
+                        <label for="registrationFee">Registration Fee</label>
                         <input type="number" class="form-control" id="registrationFee" name="registration_fee" step="0.01" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="totalAmount">Total Amount</label>
                         <input type="number" class="form-control" id="totalAmount" name="total_amount" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="totalAmount">Total Amount inclusive of fee charged</label>
+                        <input type="number" class="form-control" id="totalAmount_inclusive" name="total_amount_inclusive" readonly>
                     </div>
                     <div class="form-group">
                         <label for="repaymentAmount">Repayment Amount Per Cycle</label>
@@ -277,7 +277,6 @@
             var principal = parseFloat(document.getElementById('principal').value) || 0;
             var loanDuration = parseFloat(document.getElementById('loanDuration').value) || 0;
             var loanDurationUnit = document.getElementById('loanDurationUnit').value;
-            var interest = parseFloat(document.getElementById('interest').value) || 0;
             var interestMethod = document.getElementById('interestMethod').value;
             var interestCalculation = document.getElementById('interestCalculation').value;
             var processingFee = parseFloat(document.getElementById('processingFee').value) || 0;
@@ -328,29 +327,35 @@
                 case 'percentage':
                     switch (interestCalculation) {
                         case 'weekly':
-                            totalInterest = (principal * (interest / 100)) * durationInWeeks;
+                            totalInterest = (principal * (loanInterestPercentage / 100)) * durationInWeeks;
                             break;
                         case 'monthly':
-                            totalInterest = (principal * (interest / 100)) * (durationInWeeks / 4);
+                            totalInterest = (principal * (loanInterestPercentage / 100)) * (durationInWeeks / 4);
                             break;
                         case 'yearly':
-                            totalInterest = (principal * (interest / 100)) * (durationInWeeks / 52);
+                            totalInterest = (principal * (loanInterestPercentage / 100)) * (durationInWeeks / 52);
                             break;
                     }
                     break;
                 case 'fixed_amount':
-                    totalInterest = interest * numberOfRepayments;
+                    totalInterest = loanInterestPercentage * numberOfRepayments;
                     break;
             }
-
-            var totalAmount = principal + totalInterest + processingFee + registrationFee;
+            var totalAmountInclusive=principal + totalInterest + processingFee + registrationFee;
+            var totalAmount = principal + totalInterest;
             var repaymentAmount = totalAmount / numberOfRepayments;
 
             // Set the calculated values in the form
             document.getElementById('numberOfRepayments').value = numberOfRepayments.toFixed(2);
             document.getElementById('totalAmount').value = totalAmount.toFixed(2);
             document.getElementById('repaymentAmount').value = repaymentAmount.toFixed(2);
+            document.getElementById('totalAmount_inclusive').value=totalAmountInclusive.toFixed(2);
         }
     </script>
+     <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

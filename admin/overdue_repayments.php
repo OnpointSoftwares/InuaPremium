@@ -109,18 +109,13 @@ ini_set('display_startup_errors', 1); error_reporting(E_ALL);
                         borrowers ON loan_applications.borrower = borrowers.id
                     WHERE 
                         repayments.repayment_date < CURDATE() 
-                        AND DATEDIFF(CURDATE(), repayments.repayment_date) > $days";
+                        ";
 
     $result_overdue = $conn->query($sql_overdue);
     ?>
     <main class="main">
         <section class="section">
-            <!-- Form to select the number of overdue days -->
-            <form method="GET" action="">
-                <label for="days">Check overdue repayments for more than: </label>
-                <input type="number" name="days" id="days" min="1" value="<?php echo $days; ?>" onchange="this.form.submit()" class="form-control">
-                <span>days</span>
-            </form>
+         
             
             <div class="table-container">
                 <h2>Overdue Repayments > <?php echo $days; ?> days</h2>
